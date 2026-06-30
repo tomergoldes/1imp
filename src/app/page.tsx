@@ -12,122 +12,17 @@ const fv = (delay = 0) => ({
   visible: { opacity: 1, y: 0, transition: { duration: 0.55, delay, ease: [0.16, 1, 0.3, 1] } },
 });
 
-/* ══════════════════════════════════════════════════════════════════════════
-   NAVBAR — exact Voyantis: transparent → white-blur on scroll
-   ══════════════════════════════════════════════════════════════════════════ */
-function Navbar() {
-  const [scrolled, setScrolled] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
-
-  useEffect(() => {
-    const fn = () => setScrolled(window.scrollY > 8);
-    window.addEventListener("scroll", fn, { passive: true });
-    return () => window.removeEventListener("scroll", fn);
-  }, []);
-
-  const links = [
-    { label: "Products", dropdown: true },
-    { label: "Solutions", dropdown: true },
-    { label: "Success Stories", dropdown: false },
-    { label: "Resources", dropdown: true },
-    { label: "Company", dropdown: true },
-  ];
-
-  return (
-    <header style={{
-      position: "fixed", top: 0, left: 0, right: 0, zIndex: 200,
-      background: scrolled ? "rgba(255,255,255,0.92)" : "transparent",
-      backdropFilter: scrolled ? "blur(12px)" : "none",
-      borderBottom: scrolled ? "1px solid rgba(99,82,138,0.1)" : "none",
-      transition: "all 280ms ease",
-    }}>
-      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 1.5rem", display: "flex", alignItems: "center", height: 60 }}>
-
-        {/* Logo */}
-        <Link href="/" style={{ display: "flex", alignItems: "center", gap: "0.4rem", textDecoration: "none", flexShrink: 0 }}>
-          {/* Voyantis-style swirl icon */}
-          <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
-            <path d="M16 4C9.373 4 4 9.373 4 16s5.373 12 12 12 12-5.373 12-12S22.627 4 16 4z" fill="#F2F0F9"/>
-            <path d="M20.5 11.5C20.5 11.5 18 10 15.5 11.5C13 13 13 16 15 17.5C17 19 19.5 18.5 20.5 17C21.5 15.5 21 13 19 12C17 11 14.5 12 13.5 14C12.5 16 13.5 18.5 15.5 19.5" stroke="#E8355A" strokeWidth="2.2" strokeLinecap="round" fill="none"/>
-          </svg>
-          <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "1.1rem", color: "#100030", letterSpacing: "-0.01em" }}>
-            1IMP
-          </span>
-        </Link>
-
-        {/* Desktop nav */}
-        <nav style={{ display: "flex", alignItems: "center", gap: 0, margin: "0 auto" }} className="v-nav">
-          {links.map(link => (
-            <button key={link.label} style={{
-              display: "inline-flex", alignItems: "center", gap: 3,
-              padding: "0.45rem 0.875rem", background: "none", border: "none", cursor: "pointer",
-              fontSize: "0.9rem", fontWeight: 450, color: "#333", fontFamily: "var(--font-body)",
-              borderRadius: 8, transition: "background 150ms",
-            }}
-              onMouseEnter={e => (e.currentTarget.style.background = "rgba(99,82,138,0.07)")}
-              onMouseLeave={e => (e.currentTarget.style.background = "none")}
-            >
-              {link.label}
-              {link.dropdown && <ChevronDown size={12} style={{ opacity: 0.5 }} />}
-            </button>
-          ))}
-        </nav>
-
-        {/* CTA */}
-        <Link href="/contact" style={{
-          display: "inline-flex", alignItems: "center", padding: "0.5rem 1.25rem",
-          background: "#100030", color: "white", borderRadius: 9999, fontSize: "0.875rem",
-          fontWeight: 600, textDecoration: "none", fontFamily: "var(--font-body)",
-          transition: "opacity 150ms", flexShrink: 0,
-        }}
-          className="v-cta"
-          onMouseEnter={e => (e.currentTarget.style.opacity = "0.85")}
-          onMouseLeave={e => (e.currentTarget.style.opacity = "1")}
-        >
-          Book a Consultation
-        </Link>
-
-        {/* Mobile toggle */}
-        <button onClick={() => setMobileOpen(o => !o)}
-          style={{ display: "none", background: "none", border: "none", cursor: "pointer", padding: 6, marginLeft: 8 }}
-          className="v-hamburger"
-        >
-          <div style={{ width: 22, height: 2, background: "#100030", marginBottom: 5 }} />
-          <div style={{ width: 22, height: 2, background: "#100030", marginBottom: 5 }} />
-          <div style={{ width: 22, height: 2, background: "#100030" }} />
-        </button>
-      </div>
-
-      {/* Mobile menu */}
-      <AnimatePresence>
-        {mobileOpen && (
-          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }}
-            style={{ background: "white", borderBottom: "1px solid #eee", overflow: "hidden" }}>
-            <div style={{ padding: "1rem 1.5rem", display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-              {links.map(l => <div key={l.label} style={{ fontSize: "0.95rem", color: "#100030", fontWeight: 500 }}>{l.label}</div>)}
-              <Link href="/contact" style={{ display: "inline-flex", alignItems: "center", padding: "0.6rem 1.25rem", background: "#100030", color: "white", borderRadius: 9999, fontSize: "0.875rem", fontWeight: 600, textDecoration: "none", marginTop: 4, width: "fit-content" }}>Book a Consultation</Link>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      <style>{`
-        @media(max-width:768px){ .v-nav{display:none!important} .v-cta{display:none!important} .v-hamburger{display:flex!important; flex-direction:column} }
-      `}</style>
-    </header>
-  );
-}
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 
 /* ══════════════════════════════════════════════════════════════════════════
    HERO — exact Voyantis: rounded card, flowers illustration, coral + outline btns
    ══════════════════════════════════════════════════════════════════════════ */
 function HeroSection() {
   return (
-    <section style={{ position: "relative", width: "100%", minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
-      
-      {/* User's MAIN Image as full screen background */}
+    <section style={{ position: "relative", width: "100%", minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-start", paddingTop: "20vh", overflow: "hidden" }}>
 
-          {/* User's MAIN Image as background */}
+          {/* Background image */}
           <div style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, zIndex: 1 }}>
             <Image
               src="/MAIN.png"
@@ -139,7 +34,7 @@ function HeroSection() {
           </div>
 
           {/* Hero text content — sits above the background image */}
-          <div style={{ textAlign: "center", padding: "3.5rem 2rem 2rem", position: "relative", zIndex: 10, maxWidth: 680, width: "100%" }}>
+          <div style={{ textAlign: "center", padding: "3.5rem 2rem 2rem", position: "relative", zIndex: 10, maxWidth: 900, width: "100%" }}>
             <motion.p
               initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
@@ -148,19 +43,19 @@ function HeroSection() {
                 color: "#6361B8", marginBottom: "1.1rem", fontFamily: "var(--font-body)",
               }}
             >
-              AI FIRST IMPRESSION PLATFORM
+              AI VIDEO GENERATOR FOR CAREERS
             </motion.p>
 
             <motion.h1
               initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.08, duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
               style={{
-                fontFamily: "var(--font-display)", fontWeight: 800,
-                fontSize: "clamp(1.75rem, 3.5vw, 2.75rem)", lineHeight: 1.12,
-                letterSpacing: "-0.025em", color: "#100030", marginBottom: "1rem",
+                fontFamily: "var(--font-body)", fontWeight: 500,
+                fontSize: "clamp(1.75rem, 3vw, 2.75rem)", lineHeight: 1.15,
+                letterSpacing: "-0.03em", color: "#100030", marginBottom: "1.25rem",
               }}
             >
-              Stop letting great candidates<br />get lost in the noise
+              Turn your boring PDF resume<br />into a viral video in 60 seconds.
             </motion.h1>
 
             <motion.p
@@ -168,10 +63,10 @@ function HeroSection() {
               transition={{ delay: 0.16, duration: 0.5 }}
               style={{
                 fontSize: "1rem", color: "#555570", lineHeight: 1.65,
-                fontFamily: "var(--font-body)", maxWidth: 480, margin: "0 auto 1.75rem",
+                fontFamily: "var(--font-body)", maxWidth: 520, margin: "0 auto 1.75rem",
               }}
             >
-              Turn your resume into an AI-powered first impression that trains recruiters to notice you — before anyone else.
+              Recruiters don't read PDFs, they watch stories. Upload your resume and let our AI generate a stunning Web Story you can send directly to hiring managers.
             </motion.p>
 
             <motion.div
@@ -180,31 +75,32 @@ function HeroSection() {
               style={{ display: "flex", gap: "0.75rem", justifyContent: "center", flexWrap: "wrap" }}
             >
               {/* Coral primary */}
-              <Link href="/signup" style={{
-                display: "inline-flex", alignItems: "center", padding: "0.65rem 1.6rem",
-                background: "#E8355A", color: "white", borderRadius: 9999,
-                fontSize: "0.9375rem", fontWeight: 600, textDecoration: "none",
-                fontFamily: "var(--font-body)", boxShadow: "0 2px 16px rgba(232,53,90,0.3)",
+              <Link href="/create" style={{
+                display: "inline-flex", alignItems: "center", padding: "0.75rem 1.75rem",
+                background: "#FF3B6B", color: "white", borderRadius: 9999,
+                border: "1.5px solid #100030",
+                fontSize: "1rem", fontWeight: 600, textDecoration: "none",
+                fontFamily: "var(--font-body)", 
+                boxShadow: "inset 0px -3.5px 0px rgba(0,0,0,0.22)",
                 transition: "all 160ms",
               }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "#d02048"; (e.currentTarget as HTMLElement).style.transform = "translateY(-1px)"; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "#E8355A"; (e.currentTarget as HTMLElement).style.transform = ""; }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.filter = "brightness(1.05)"; (e.currentTarget as HTMLElement).style.transform = "translateY(-1px)"; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.filter = "brightness(1)"; (e.currentTarget as HTMLElement).style.transform = ""; }}
               >
-                Create my Impression
+                Generate Your Video
               </Link>
 
               {/* Outline secondary */}
               <Link href="#how-it-works" style={{
-                display: "inline-flex", alignItems: "center", padding: "0.65rem 1.6rem",
-                background: "rgba(255,255,255,0.75)", color: "#100030", borderRadius: 9999,
-                border: "1.5px solid rgba(16,0,48,0.18)", fontSize: "0.9375rem", fontWeight: 500,
+                display: "inline-flex", alignItems: "center", padding: "0.75rem 1.75rem",
+                background: "white", color: "#100030", borderRadius: 9999,
+                border: "1px solid #6361B8", fontSize: "1rem", fontWeight: 500,
                 textDecoration: "none", fontFamily: "var(--font-body)", transition: "all 160ms",
-                backdropFilter: "blur(6px)",
               }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.95)"; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.75)"; }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "#f4f4f8"; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "white"; }}
               >
-                See how it works
+                Watch Demo
               </Link>
             </motion.div>
           </div>
@@ -212,76 +108,6 @@ function HeroSection() {
   );
 }
 
-/* ══════════════════════════════════════════════════════════════════════════
-   LOGOS — "Powering growth at the world's most ambitious companies"
-   Two rows of logo badges with ↗ arrows, exactly like Voyantis
-   ══════════════════════════════════════════════════════════════════════════ */
-const logoRow1 = ["Upside", "Opendoor", "LENNAR", "Klar", "MyHeritage", "ZipRecruiter", "UNISWAP", "MoneyLion"];
-const logoRow2 = ["44pixels", "Rappi", "miro", "inDrive", "current", "shippo", "sondermind°"];
-
-function LogosSection() {
-  const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-60px" });
-
-  return (
-    <section ref={ref} style={{ background: "#ECEEF8", padding: "4rem 0 5rem" }}>
-      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 1.5rem" }}>
-        <motion.p
-          initial={{ opacity: 0 }} animate={inView ? { opacity: 1 } : {}}
-          transition={{ duration: 0.5 }}
-          style={{ textAlign: "center", fontSize: "0.875rem", color: "#77778A", marginBottom: "2rem", fontFamily: "var(--font-body)" }}
-        >
-          Powering growth at the world&apos;s most ambitious companies
-        </motion.p>
-
-        {/* Row 1 */}
-        <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "0.6rem", marginBottom: "0.6rem" }}>
-          {logoRow1.map((name, i) => (
-            <motion.div key={name}
-              initial={{ opacity: 0, y: 10 }} animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ delay: i * 0.05, duration: 0.4 }}
-              style={{
-                display: "inline-flex", alignItems: "center", gap: "0.4rem",
-                padding: "0.5rem 1.1rem", background: "white",
-                border: "1px solid rgba(99,82,138,0.18)", borderRadius: 8,
-                fontWeight: 700, fontSize: "0.9rem", color: "#100030",
-                fontFamily: "var(--font-body)", boxShadow: "0 1px 4px rgba(16,0,48,0.06)",
-                cursor: "pointer", transition: "box-shadow 160ms",
-                position: "relative",
-              }}
-              whileHover={{ y: -2, boxShadow: "0 4px 16px rgba(16,0,48,0.12)" }}
-            >
-              {name}
-              <span style={{ fontSize: "0.7rem", color: "#6361B8", position: "absolute", bottom: 2, right: 4 }}>↗</span>
-            </motion.div>
-          ))}
-        </div>
-
-        {/* Row 2 */}
-        <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "0.6rem" }}>
-          {logoRow2.map((name, i) => (
-            <motion.div key={name}
-              initial={{ opacity: 0, y: 10 }} animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ delay: i * 0.05 + 0.3, duration: 0.4 }}
-              style={{
-                display: "inline-flex", alignItems: "center", gap: "0.4rem",
-                padding: "0.5rem 1.1rem", background: "white",
-                border: "1px solid rgba(99,82,138,0.18)", borderRadius: 8,
-                fontWeight: 700, fontSize: "0.9rem", color: "#100030",
-                fontFamily: "var(--font-body)", boxShadow: "0 1px 4px rgba(16,0,48,0.06)",
-                cursor: "pointer", position: "relative",
-              }}
-              whileHover={{ y: -2, boxShadow: "0 4px 16px rgba(16,0,48,0.12)" }}
-            >
-              {name}
-              <span style={{ fontSize: "0.7rem", color: "#6361B8", position: "absolute", bottom: 2, right: 4 }}>↗</span>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
 
 /* ══════════════════════════════════════════════════════════════════════════
    CHALLENGE — sticky left headline + 3 scrolling cards on right
@@ -330,13 +156,12 @@ function ChallengeSection() {
               fontSize: "clamp(1.75rem, 3vw, 2.75rem)", color: "#100030",
               lineHeight: 1.15, letterSpacing: "-0.02em", marginBottom: "1.25rem",
             }}>
-              Your hiring process is optimizing for the wrong candidates
+              Stop blending into a pile of 500 identical PDFs
             </motion.h2>
             <motion.p {...fv(0.14)} animate={inView ? "visible" : "hidden"} style={{
               fontSize: "1rem", color: "#555570", lineHeight: 1.65,
             }}>
-              Most teams are filtering for candidates who sent a PDF on the right day.
-              <br />Not candidates who are actually the best fit.
+              Recruiters spend 7 seconds looking at a resume. A video story captures their attention and forces them to actually look at your achievements.
             </motion.p>
           </div>
 
@@ -386,24 +211,24 @@ function ChallengeSection() {
    ══════════════════════════════════════════════════════════════════════════ */
 const tabs = [
   {
-    num: "01", title: "Upload",
-    desc: "Drop your resume PDF. Our AI reads every word, extracts your career story, and structures it in seconds. No formatting required.",
+    num: "01", title: "Drop Resume",
+    desc: "Paste your resume or LinkedIn profile. Our AI extracts the most impressive signals and ignores the fluff.",
     detail: "Supports PDF, Word, and plain text. Parses 500+ resume formats.",
   },
   {
-    num: "02", title: "AI Crafts",
-    desc: "Watch as AI writes your professional summary, organizes your skills, and creates your impact-led achievement bullets. All editable.",
-    detail: "Powered by advanced language models trained on 10,000+ successful profiles.",
+    num: "02", title: "Human Touch",
+    desc: "Upload 1-2 professional photos and choose your video vibe (Dynamic Tech, Corporate Clean, Creative Bold).",
+    detail: "Videos with faces get 3x more recruiter engagement.",
   },
   {
-    num: "03", title: "Customize",
-    desc: "In the split-screen editor, see exactly what your recruiter will see. Adjust, polish, and make it yours in real time.",
-    detail: "Live preview, 12 premium themes, custom domain URL.",
+    num: "03", title: "AI Generation",
+    desc: "Sit back while our AI writes the script, generates the animations, and produces a stunning Web Story in 60 seconds.",
+    detail: "Powered by advanced language models and Framer Motion.",
   },
   {
-    num: "04", title: "Share & Win",
-    desc: "Copy your personal link and send it. Get notified when someone views your impression and see which companies are interested.",
-    detail: "Real-time view notifications, company identification, engagement heatmap.",
+    num: "04", title: "Share Story",
+    desc: "Send your 1IMP link to recruiters. They watch your story exactly like an Instagram Story, directly in their browser.",
+    detail: "No app required. Works perfectly on mobile and desktop.",
   },
 ];
 
@@ -478,15 +303,15 @@ function HowItWorksSection() {
                 background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)",
                 borderRadius: 10, padding: "0.75rem 1rem",
               }}>
-                <div style={{ fontSize: "0.7rem", fontWeight: 700, color: "#A8A8D0", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: "0.4rem" }}>Your Best Impression</div>
-                {["High recruiter engagement", "Interview conversion", "Measurable profile ROI"].map(it => (
+                <div style={{ fontSize: "0.7rem", fontWeight: 700, color: "#A8A8D0", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: "0.4rem" }}>Your Viral Video</div>
+                {["300% more callbacks", "15-second visual screening", "Recruiter delight"].map(it => (
                   <div key={it} style={{ display: "flex", alignItems: "center", gap: "0.4rem", fontSize: "0.8rem", color: "rgba(255,255,255,0.75)", marginBottom: "0.2rem" }}>
                     <span style={{ color: "#E8355A" }}>↑</span> {it}
                   </div>
                 ))}
               </div>
               <div style={{ background: "rgba(99,97,184,0.2)", border: "1px solid rgba(99,97,184,0.3)", borderRadius: 10, padding: "0.6rem 1rem", fontSize: "0.8rem", color: "rgba(255,255,255,0.8)" }}>
-                ↗ High Return On Profile
+                ↗ High Return On Application
               </div>
             </div>
           </div>
@@ -569,96 +394,140 @@ function SuccessStoriesSection() {
   const inView = useInView(ref, { once: true, margin: "-80px" });
 
   return (
-    <section ref={ref} style={{ background: "#F4F2FC", padding: "6rem 0" }}>
-      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 1.5rem" }}>
+    <section ref={ref} style={{ background: "#FDFDFD", padding: "8rem 0" }}>
+      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 1.5rem", overflow: "hidden" }}>
         <motion.h2 {...fv(0)} animate={inView ? "visible" : "hidden"} style={{
           fontFamily: "var(--font-display)", fontWeight: 800,
-          fontSize: "clamp(1.75rem, 3vw, 2.5rem)", color: "#100030",
+          fontSize: "clamp(1.75rem, 3.5vw, 2.75rem)", color: "#100030",
           textAlign: "center", letterSpacing: "-0.02em", lineHeight: 1.2,
-          marginBottom: "3rem", maxWidth: 640, margin: "0 auto 3rem",
+          marginBottom: "3rem", maxWidth: 640, margin: "0 auto 4rem",
         }}>
           See how candidates are winning with 1IMP
         </motion.h2>
 
         {/* Cards carousel */}
-        <div style={{ display: "flex", gap: "1.25rem", alignItems: "center", position: "relative" }} className="stories-container">
+        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", position: "relative", height: 500 }} className="stories-container">
           {stories.map((story, i) => {
             const isActive = i === active;
             const offset = i - active;
+            
+            // Aggressive overlap
+            let xOffset = 0;
+            if (offset < 0) xOffset = offset * 220 + 120; // pull right
+            if (offset > 0) xOffset = offset * 220 - 120; // pull left
+            
             return (
               <motion.div key={i}
                 animate={{
-                  scale: isActive ? 1 : 0.88,
-                  opacity: isActive ? 1 : 0.7,
-                  x: offset * 20,
+                  scale: isActive ? 1 : 0.85,
+                  opacity: isActive ? 1 : Math.abs(offset) > 1 ? 0 : 0.9,
+                  x: xOffset,
+                  zIndex: isActive ? 10 : 5 - Math.abs(offset),
+                  rotate: offset * 2, // Slight tilt for inactive cards
                 }}
-                transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+                transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
                 onClick={() => setActive(i)}
                 style={{
-                  borderRadius: 20, overflow: "hidden", cursor: "pointer",
-                  minWidth: isActive ? 380 : 300, flex: isActive ? "0 0 380px" : "0 0 300px",
-                  background: story.color, border: "1px solid rgba(0,0,0,0.06)",
-                  boxShadow: isActive ? "0 12px 48px rgba(0,0,0,0.14)" : "0 2px 8px rgba(0,0,0,0.06)",
-                  transition: "all 300ms",
+                  position: "absolute",
+                  borderRadius: 20, overflow: "hidden", cursor: isActive ? "default" : "pointer",
+                  width: 380, height: isActive ? 480 : 380,
+                  background: isActive ? "white" : story.color, 
+                  border: "1px solid rgba(16,0,48,0.08)",
+                  boxShadow: isActive ? "0 24px 64px rgba(16,0,48,0.12)" : "0 8px 24px rgba(16,0,48,0.06)",
+                  display: "flex", flexDirection: "column",
+                  pointerEvents: Math.abs(offset) > 1 ? "none" : "auto",
                 }}
               >
                 {/* Botanical SVG illustration at top */}
-                <div style={{ height: isActive ? 200 : 160, background: story.color, position: "relative", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  {/* Stylized plant shapes */}
-                  <svg style={{ position: "absolute", bottom: 0, left: 0, right: 0 }} viewBox="0 0 380 200" width="100%" height="100%">
-                    <ellipse cx={190} cy={220} rx={220} ry={80} fill="rgba(0,0,0,0.06)"/>
-                    <path d="M90 200 Q100 140 130 100 Q150 70 140 30" stroke="rgba(0,0,0,0.2)" strokeWidth="2" fill="none"/>
-                    <path d="M140 30 Q160 5 175 40" stroke="rgba(0,0,0,0.15)" strokeWidth="2" fill="none"/>
-                    <ellipse cx={155} cy={35} rx={18} ry={28} fill="rgba(0,0,0,0.12)" transform="rotate(-15 155 35)"/>
-                    <path d="M290 200 Q280 140 260 100 Q250 70 260 30" stroke="rgba(0,0,0,0.2)" strokeWidth="2" fill="none"/>
-                    <ellipse cx={252} cy={28} rx={16} ry={26} fill="rgba(0,0,0,0.12)" transform="rotate(15 252 28)"/>
-                    <path d="M190 200 Q185 160 195 120" stroke="rgba(0,0,0,0.15)" strokeWidth="2" fill="none"/>
+                <div style={{ 
+                  height: isActive ? 240 : 280, 
+                  background: story.color, position: "relative", overflow: "hidden", 
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  flexShrink: 0, borderBottom: isActive ? "1px solid rgba(16,0,48,0.06)" : "none"
+                }}>
+                  
+                  {/* Dense, layered vector leaves matching the reference */}
+                  <svg style={{ position: "absolute", bottom: 0, left: 0, right: 0 }} viewBox="0 0 380 240" width="100%" height="100%">
+                    {/* Background mound */}
+                    <ellipse cx={190} cy={240} rx={220} ry={60} fill="rgba(0,0,0,0.08)"/>
+                    
+                    {/* Back leaves (darkest) */}
+                    <path d="M 120 240 C 60 140 10 90 60 50 C 90 80 130 160 170 240" fill="rgba(0,0,0,0.18)" />
+                    <path d="M 260 240 C 320 140 370 90 320 50 C 290 80 250 160 210 240" fill="rgba(0,0,0,0.22)" />
+                    
+                    {/* Tall center back leaf */}
+                    <path d="M 190 240 C 140 120 160 20 220 15 C 250 60 220 160 190 240" fill="rgba(0,0,0,0.12)" />
+
+                    {/* Mid-ground broad leaves */}
+                    <path d="M 170 240 C 90 160 80 80 140 60 C 170 100 180 180 190 240" fill="rgba(0,0,0,0.08)" />
+                    <path d="M 210 240 C 290 160 300 80 240 60 C 210 100 200 180 190 240" fill="rgba(0,0,0,0.14)" />
+
+                    {/* Foreground thick folded leaves */}
+                    <path d="M 140 240 C 70 190 60 140 110 120 C 140 140 160 190 190 240" fill="rgba(0,0,0,0.28)" />
+                    <path d="M 240 240 C 310 190 320 140 270 120 C 240 140 220 190 190 240" fill="rgba(0,0,0,0.25)" />
+                    
+                    {/* Central hero leaf */}
+                    <path d="M 190 240 C 150 160 170 100 210 90 C 240 130 220 190 190 240" fill="rgba(0,0,0,0.18)" />
+                    
+                    {/* Leaf veins / detail lines */}
+                    <path d="M 140 240 C 110 200 95 160 110 120" stroke="rgba(255,255,255,0.2)" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+                    <path d="M 240 240 C 270 200 285 160 270 120" stroke="rgba(255,255,255,0.2)" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+                    <path d="M 190 240 C 180 190 190 140 210 90" stroke="rgba(255,255,255,0.3)" strokeWidth="2.5" strokeLinecap="round" fill="none" />
                   </svg>
 
                   {/* Brand logo badge */}
                   <div style={{
-                    background: "white", borderRadius: 12, padding: "0.5rem 1.25rem",
-                    fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "1.25rem",
-                    color: "#100030", zIndex: 2, boxShadow: "0 2px 12px rgba(0,0,0,0.12)",
+                    background: "white", borderRadius: 14, padding: "0.6rem 1.5rem",
+                    fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "1.4rem",
+                    color: story.textColor, zIndex: 2, boxShadow: "0 6px 20px rgba(0,0,0,0.15)",
+                    display: "flex", alignItems: "center", gap: "0.5rem"
                   }}>
+                    {/* Abstract logo mark */}
+                    <div style={{ width: 20, height: 20, background: story.textColor, borderRadius: 4, opacity: 0.9 }} />
                     {story.brand}
                   </div>
                 </div>
 
-                {/* Card content */}
-                <div style={{ padding: "1.5rem", background: isActive ? "white" : story.color }}>
-                  {isActive && (
+                {/* Card content area */}
+                <div style={{ padding: isActive ? "1.5rem 1.75rem" : "1.25rem 1.5rem", flex: 1, display: "flex", flexDirection: "column" }}>
+                  {isActive ? (
                     <>
-                      <div style={{ fontSize: "0.75rem", color: "#9B97C8", fontWeight: 600, marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                      <div style={{ fontSize: "0.75rem", color: "#9B97C8", fontWeight: 700, marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.06em" }}>
                         {story.tagline}
                       </div>
-                      <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "1.0625rem", color: "#100030", lineHeight: 1.3, marginBottom: "1.25rem" }}>
+                      <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "1.125rem", color: "#100030", lineHeight: 1.35, marginBottom: "1.5rem" }}>
                         {story.headline}
                       </p>
-                      <div style={{ display: "flex", gap: "1rem" }}>
-                        <div style={{ flex: 1, background: "rgba(99,97,184,0.08)", borderRadius: 10, padding: "0.75rem" }}>
-                          <div style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "1.75rem", color: "#6361B8", lineHeight: 1 }}>{story.stat1}</div>
-                          <div style={{ fontSize: "0.75rem", color: "#777" }}>{story.stat1Label}</div>
+                      <div style={{ display: "flex", gap: "1rem", marginBottom: "1.5rem" }}>
+                        <div style={{ flex: 1, background: "rgba(99,97,184,0.06)", borderRadius: 12, padding: "1rem" }}>
+                          <div style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "1.85rem", color: "#6361B8", lineHeight: 1, marginBottom: "0.25rem" }}>{story.stat1}</div>
+                          <div style={{ fontSize: "0.75rem", color: "#555570", lineHeight: 1.3 }}>{story.stat1Label}</div>
                         </div>
-                        <div style={{ flex: 1, background: "rgba(99,97,184,0.08)", borderRadius: 10, padding: "0.75rem" }}>
-                          <div style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "1.75rem", color: "#6361B8", lineHeight: 1 }}>{story.stat2}</div>
-                          <div style={{ fontSize: "0.75rem", color: "#777" }}>{story.stat2Label}</div>
+                        <div style={{ flex: 1, background: "rgba(99,97,184,0.06)", borderRadius: 12, padding: "1rem" }}>
+                          <div style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "1.85rem", color: "#6361B8", lineHeight: 1, marginBottom: "0.25rem" }}>{story.stat2}</div>
+                          <div style={{ fontSize: "0.75rem", color: "#555570", lineHeight: 1.3 }}>{story.stat2Label}</div>
                         </div>
                       </div>
-                      <button style={{
-                        display: "inline-flex", alignItems: "center", gap: "0.4rem",
-                        marginTop: "1.25rem", padding: "0.6rem 1.25rem",
-                        background: "#100030", color: "white", borderRadius: 9999,
-                        border: "none", cursor: "pointer", fontSize: "0.875rem", fontWeight: 600,
-                      }}>
-                        Case Study <ArrowRight size={14} />
-                      </button>
+                      <div style={{ marginTop: "auto", display: "flex", justifyContent: "flex-end" }}>
+                        <button style={{
+                          display: "inline-flex", alignItems: "center", gap: "0.4rem",
+                          padding: "0.6rem 1.25rem", background: "#100030", color: "white", 
+                          borderRadius: 9999, border: "none", cursor: "pointer", 
+                          fontSize: "0.875rem", fontWeight: 600, transition: "transform 150ms"
+                        }}
+                          onMouseEnter={e => e.currentTarget.style.transform = "translateX(2px)"}
+                          onMouseLeave={e => e.currentTarget.style.transform = "translateX(0)"}
+                        >
+                          Case Study <ArrowRight size={14} />
+                        </button>
+                      </div>
                     </>
-                  )}
-                  {!isActive && (
-                    <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "0.9375rem", color: "#100030", lineHeight: 1.35, opacity: 0.8 }}>
-                      {story.headline}
-                    </p>
+                  ) : (
+                    <div style={{ display: "flex", alignItems: "center", height: "100%" }}>
+                      <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "0.9375rem", color: "rgba(16,0,48,0.7)", lineHeight: 1.4 }}>
+                        {story.headline}
+                      </p>
+                    </div>
                   )}
                 </div>
               </motion.div>
@@ -667,15 +536,21 @@ function SuccessStoriesSection() {
         </div>
 
         {/* Navigation dots + arrows */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "1rem", marginTop: "2rem" }}>
-          <button onClick={() => setActive(Math.max(0, active - 1))} style={{ width: 36, height: 36, borderRadius: "50%", border: "1.5px solid rgba(16,0,48,0.2)", background: "white", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <ChevronLeft size={16} />
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "1.25rem", marginTop: "1rem" }}>
+          <button onClick={() => setActive(Math.max(0, active - 1))} style={{ width: 40, height: 40, borderRadius: "50%", border: "1px solid rgba(16,0,48,0.15)", background: "white", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#100030", transition: "all 150ms" }}
+            onMouseEnter={e => e.currentTarget.style.background = "#f4f4f8"} onMouseLeave={e => e.currentTarget.style.background = "white"}
+          >
+            <ChevronLeft size={18} />
           </button>
-          {stories.map((_, i) => (
-            <button key={i} onClick={() => setActive(i)} style={{ width: i === active ? 22 : 8, height: 8, borderRadius: 99, background: i === active ? "#100030" : "rgba(16,0,48,0.2)", border: "none", cursor: "pointer", padding: 0, transition: "all 200ms" }} />
-          ))}
-          <button onClick={() => setActive(Math.min(stories.length - 1, active + 1))} style={{ width: 36, height: 36, borderRadius: "50%", border: "1.5px solid rgba(16,0,48,0.2)", background: "white", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <ChevronRight size={16} />
+          <div style={{ display: "flex", gap: "0.5rem" }}>
+            {stories.map((_, i) => (
+              <button key={i} onClick={() => setActive(i)} style={{ width: i === active ? 24 : 8, height: 8, borderRadius: 99, background: i === active ? "#100030" : "rgba(16,0,48,0.15)", border: "none", cursor: "pointer", padding: 0, transition: "all 250ms cubic-bezier(0.16,1,0.3,1)" }} />
+            ))}
+          </div>
+          <button onClick={() => setActive(Math.min(stories.length - 1, active + 1))} style={{ width: 40, height: 40, borderRadius: "50%", border: "1px solid rgba(16,0,48,0.15)", background: "white", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#100030", transition: "all 150ms" }}
+            onMouseEnter={e => e.currentTarget.style.background = "#f4f4f8"} onMouseLeave={e => e.currentTarget.style.background = "white"}
+          >
+            <ChevronRight size={18} />
           </button>
         </div>
       </div>
@@ -798,18 +673,18 @@ function CTASection() {
             lineHeight: 1.15, letterSpacing: "-0.02em",
             marginBottom: "1.5rem", maxWidth: 600, margin: "0 auto 1.5rem",
           }}>
-            Start making unforgettable first impressions today
+            Ready to stop getting ignored by recruiters?
           </h2>
-          <Link href="/signup" style={{
+          <Link href="/create" style={{
             display: "inline-flex", alignItems: "center", padding: "0.8rem 2rem",
             background: "#E8355A", color: "white", borderRadius: 9999,
             fontSize: "1rem", fontWeight: 600, textDecoration: "none",
             fontFamily: "var(--font-body)", boxShadow: "0 2px 16px rgba(232,53,90,0.3)",
           }}>
-            Create My Impression — It&apos;s Free
+            Generate Your Video — It&apos;s Free
           </Link>
           <p style={{ fontSize: "0.8125rem", color: "#9999AA", marginTop: "1rem" }}>
-            No credit card required · Ready in under 3 minutes
+            No account required · Ready in 60 seconds
           </p>
         </motion.div>
       </div>
@@ -849,10 +724,12 @@ function CTASection() {
             {/* Brand */}
             <div>
               <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", marginBottom: "1rem" }}>
-                <svg width="24" height="24" viewBox="0 0 32 32" fill="none">
-                  <path d="M20.5 11.5C20.5 11.5 18 10 15.5 11.5C13 13 13 16 15 17.5C17 19 19.5 18.5 20.5 17C21.5 15.5 21 13 19 12C17 11 14.5 12 13.5 14C12.5 16 13.5 18.5 15.5 19.5" stroke="#E8355A" strokeWidth="2.2" strokeLinecap="round" fill="none"/>
+                <svg width="24" height="24" viewBox="0 0 30 30" fill="none">
+                  <circle cx="15" cy="15" r="13" stroke="#E8355A" strokeWidth="2"/>
+                  <circle cx="15" cy="15" r="8" stroke="#E8355A" strokeWidth="1.5" strokeOpacity="0.4"/>
+                  <circle cx="15" cy="15" r="3.5" fill="#E8355A"/>
                 </svg>
-                <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "1.0625rem", color: "white" }}>1IMP</span>
+                <span style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "1.0625rem", color: "white", letterSpacing: "0.01em" }}>1IMP</span>
               </div>
               <p style={{ fontSize: "0.875rem", color: "rgba(255,255,255,0.45)", lineHeight: 1.65, maxWidth: 240 }}>
                 The world&apos;s first AI-powered First Impression Platform. Helping every candidate get noticed.
@@ -896,6 +773,228 @@ function CTASection() {
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
+   FEATURE SHOWCASE — 3-card grid: AI Summary, Analytics, Share
+   ══════════════════════════════════════════════════════════════════════════ */
+const features = [
+  {
+    icon: "✦",
+    tag: "AI-POWERED",
+    title: "Your story, written brilliantly",
+    desc: "Drop your resume and watch our AI craft a professional summary that sounds exactly like you — only sharper. Every bullet rewritten for impact. Every skill surfaced for relevance.",
+    accent: "#6361B8",
+    bg: "linear-gradient(135deg, #F0EEFB 0%, #E4E0F4 100%)",
+    highlights: ["Professional summary in seconds", "Achievement bullets rewritten for impact", "Skills automatically ranked by relevance"],
+  },
+  {
+    icon: "◎",
+    tag: "ANALYTICS",
+    title: "See who's interested, before they call",
+    desc: "Get real-time notifications when someone views your impression. Know which companies are looking, how long they spent, and which sections grabbed their attention.",
+    accent: "#E8355A",
+    bg: "linear-gradient(135deg, #FEF0F3 0%, #FDDCE3 100%)",
+    highlights: ["Real-time view notifications", "Company identification (Pro)", "Section engagement heatmap"],
+  },
+  {
+    icon: "⌁",
+    tag: "SHARE ANYWHERE",
+    title: "One link. Every platform. Instant wow.",
+    desc: "Your personalized 1IMP link works everywhere — LinkedIn messages, email signatures, job applications, QR codes. Beautiful Open Graph previews make every share count.",
+    accent: "#100030",
+    bg: "linear-gradient(135deg, #ECEEF8 0%, #E0E4F4 100%)",
+    highlights: ["Custom yourname.1imp.io URL", "Beautiful Open Graph previews", "QR code + one-click copy"],
+  },
+];
+
+function FeatureShowcaseSection() {
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, margin: "-80px" });
+
+  return (
+    <section ref={ref} style={{ background: "#F4F2FC", padding: "6rem 0" }}>
+      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 1.5rem" }}>
+        <motion.div {...fv(0)} animate={inView ? "visible" : "hidden"} style={{ textAlign: "center", marginBottom: "3.5rem" }}>
+          <p style={{ fontSize: "0.72rem", fontWeight: 700, color: "#6361B8", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "0.75rem" }}>THE PLATFORM</p>
+          <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "clamp(1.75rem, 3vw, 2.75rem)", color: "#100030", letterSpacing: "-0.02em", lineHeight: 1.15, maxWidth: 560, margin: "0 auto" }}>
+            Everything you need to get noticed
+          </h2>
+        </motion.div>
+
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "1.25rem" }} className="features-grid">
+          {features.map((feat, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 28 }} animate={inView ? { opacity: 1, y: 0 } : {}}
+              transition={{ delay: i * 0.12 + 0.1, duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
+              style={{ borderRadius: 20, overflow: "hidden", border: "1px solid rgba(99,82,138,0.15)", boxShadow: "0 4px 24px rgba(16,0,48,0.07)", background: "white" }}
+            >
+              {/* Top colored area */}
+              <div style={{ background: feat.bg, padding: "2rem 2rem 1.5rem" }}>
+                <div style={{ width: 48, height: 48, borderRadius: 14, background: "white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.5rem", marginBottom: "1rem", boxShadow: "0 2px 12px rgba(16,0,48,0.1)" }}>
+                  {feat.icon}
+                </div>
+                <p style={{ fontSize: "0.68rem", fontWeight: 700, color: feat.accent, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "0.5rem" }}>{feat.tag}</p>
+                <h3 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "1.125rem", color: "#100030", lineHeight: 1.3, marginBottom: "0.875rem" }}>{feat.title}</h3>
+                <p style={{ fontSize: "0.875rem", color: "#555570", lineHeight: 1.65 }}>{feat.desc}</p>
+              </div>
+
+              {/* Highlights */}
+              <div style={{ padding: "1.25rem 2rem 1.75rem", borderTop: "1px solid rgba(99,82,138,0.12)" }}>
+                {feat.highlights.map((h, j) => (
+                  <div key={j} style={{ display: "flex", alignItems: "center", gap: "0.6rem", marginBottom: "0.6rem" }}>
+                    <div style={{ width: 18, height: 18, borderRadius: "50%", background: feat.accent, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                      <span style={{ color: "white", fontSize: "0.6rem", fontWeight: 900 }}>✓</span>
+                    </div>
+                    <span style={{ fontSize: "0.875rem", color: "#444466" }}>{h}</span>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+      <style>{`@media(max-width:900px){ .features-grid{ grid-template-columns:1fr!important; } }`}</style>
+    </section>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   PRICING — Free vs Pro cards, clean and premium
+   ══════════════════════════════════════════════════════════════════════════ */
+const plans = [
+  {
+    name: "Free",
+    price: "$0",
+    period: "forever",
+    desc: "Everything you need to get started and get noticed.",
+    cta: "Create My Impression",
+    ctaHref: "/signup",
+    dark: false,
+    features: [
+      "1 public impression page",
+      "AI-powered professional summary",
+      "Custom 1imp.io/yourname URL",
+      "Shareable link + QR code",
+      "PDF resume download button",
+      "Basic view count analytics",
+    ],
+  },
+  {
+    name: "Pro",
+    price: "$9",
+    period: "per month",
+    desc: "For serious job seekers who want every advantage.",
+    cta: "Start Pro Free for 14 Days",
+    ctaHref: "/signup?plan=pro",
+    dark: true,
+    badge: "Most Popular",
+    features: [
+      "Everything in Free",
+      "Real-time view notifications",
+      "Company identification (who viewed you)",
+      "Section engagement heatmap",
+      "Multiple impression profiles",
+      "12 premium themes",
+      "Priority AI generation",
+      "Advanced analytics dashboard",
+    ],
+  },
+  {
+    name: "Elite",
+    price: "$19",
+    period: "per month",
+    desc: "For executives and career professionals who demand the best.",
+    cta: "Get Elite Access",
+    ctaHref: "/signup?plan=elite",
+    dark: false,
+    features: [
+      "Everything in Pro",
+      "White-label (remove 1IMP branding)",
+      "AI outreach message writer",
+      "Custom domain support",
+      "Interview prep AI coach",
+      "Dedicated profile success review",
+    ],
+  },
+];
+
+function PricingSection() {
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, margin: "-80px" });
+
+  return (
+    <section ref={ref} id="pricing" style={{ background: "linear-gradient(180deg, #ECEEF8 0%, #E4E0F4 100%)", padding: "6rem 0" }}>
+      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 1.5rem" }}>
+        <motion.div {...fv(0)} animate={inView ? "visible" : "hidden"} style={{ textAlign: "center", marginBottom: "3.5rem" }}>
+          <p style={{ fontSize: "0.72rem", fontWeight: 700, color: "#E8355A", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "0.75rem" }}>PRICING</p>
+          <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "clamp(1.75rem, 3vw, 2.75rem)", color: "#100030", letterSpacing: "-0.02em", lineHeight: 1.15, maxWidth: 520, margin: "0 auto 1rem" }}>
+            Start free. Upgrade when you&apos;re ready.
+          </h2>
+          <p style={{ fontSize: "1rem", color: "#555570", maxWidth: 420, margin: "0 auto" }}>No credit card required. Cancel anytime.</p>
+        </motion.div>
+
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "1.25rem", alignItems: "start" }} className="pricing-grid">
+          {plans.map((plan, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 28 }} animate={inView ? { opacity: 1, y: 0 } : {}}
+              transition={{ delay: i * 0.1 + 0.1, duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
+              style={{
+                borderRadius: 20, overflow: "hidden", position: "relative",
+                background: plan.dark ? "#100030" : "white",
+                border: plan.dark ? "none" : "1px solid rgba(99,82,138,0.15)",
+                boxShadow: plan.dark ? "0 12px 48px rgba(16,0,48,0.22)" : "0 4px 24px rgba(16,0,48,0.07)",
+                transform: plan.dark ? "scale(1.04)" : "scale(1)",
+              }}
+            >
+              {plan.badge && (
+                <div style={{ position: "absolute", top: 16, right: 16, background: "#E8355A", color: "white", fontSize: "0.7rem", fontWeight: 700, padding: "0.2rem 0.6rem", borderRadius: 999, letterSpacing: "0.04em" }}>
+                  {plan.badge}
+                </div>
+              )}
+              <div style={{ padding: "2rem" }}>
+                <div style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "0.9rem", color: plan.dark ? "rgba(255,255,255,0.6)" : "#6361B8", marginBottom: "0.75rem", letterSpacing: "0.04em", textTransform: "uppercase" }}>{plan.name}</div>
+                <div style={{ display: "flex", alignItems: "baseline", gap: "0.35rem", marginBottom: "0.5rem" }}>
+                  <span style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "2.75rem", color: plan.dark ? "white" : "#100030", lineHeight: 1 }}>{plan.price}</span>
+                  <span style={{ fontSize: "0.875rem", color: plan.dark ? "rgba(255,255,255,0.45)" : "#9999AA" }}>/{plan.period}</span>
+                </div>
+                <p style={{ fontSize: "0.875rem", color: plan.dark ? "rgba(255,255,255,0.6)" : "#555570", lineHeight: 1.55, marginBottom: "1.75rem" }}>{plan.desc}</p>
+
+                <Link href={plan.ctaHref} style={{
+                  display: "block", textAlign: "center", padding: "0.75rem 1.5rem",
+                  background: plan.dark ? "#E8355A" : "#100030",
+                  color: "white", borderRadius: 9999,
+                  fontSize: "0.9375rem", fontWeight: 600, textDecoration: "none",
+                  fontFamily: "var(--font-body)",
+                  boxShadow: plan.dark ? "0 2px 16px rgba(232,53,90,0.4)" : "none",
+                  transition: "opacity 150ms",
+                }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.opacity = "0.85"; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.opacity = "1"; }}
+                >
+                  {plan.cta}
+                </Link>
+
+                <div style={{ borderTop: `1px solid ${plan.dark ? "rgba(255,255,255,0.1)" : "rgba(99,82,138,0.12)"}`, marginTop: "1.75rem", paddingTop: "1.5rem" }}>
+                  {plan.features.map((feat, j) => (
+                    <div key={j} style={{ display: "flex", alignItems: "flex-start", gap: "0.65rem", marginBottom: "0.75rem" }}>
+                      <div style={{ width: 18, height: 18, borderRadius: "50%", background: plan.dark ? "rgba(255,255,255,0.12)" : "rgba(99,97,184,0.12)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: 1 }}>
+                        <span style={{ color: plan.dark ? "#E8355A" : "#6361B8", fontSize: "0.6rem", fontWeight: 900 }}>✓</span>
+                      </div>
+                      <span style={{ fontSize: "0.875rem", color: plan.dark ? "rgba(255,255,255,0.75)" : "#444466", lineHeight: 1.45 }}>{feat}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+      <style>{`@media(max-width:900px){ .pricing-grid{ grid-template-columns:1fr!important; } }`}</style>
+    </section>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
    PAGE
    ══════════════════════════════════════════════════════════════════════════ */
 export default function HomePage() {
@@ -904,13 +1003,15 @@ export default function HomePage() {
       <Navbar />
       <main>
         <HeroSection />
-        <LogosSection />
         <ChallengeSection />
         <HowItWorksSection />
+        <FeatureShowcaseSection />
         <SuccessStoriesSection />
         <ComparisonSection />
+        <PricingSection />
         <CTASection />
       </main>
+      <Footer />
     </>
   );
 }
