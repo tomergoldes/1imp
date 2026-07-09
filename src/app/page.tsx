@@ -26,7 +26,7 @@ function HeroSection() {
           {/* Background image */}
           <div style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, zIndex: 1, overflow: "hidden" }}>
             <Image
-              src="/MAIN.png"
+              src="/main.png"
               alt="Main Hero Background"
               fill
               style={{ objectFit: "cover", objectPosition: "bottom center" }}
