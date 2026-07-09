@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronRight, ArrowRight, Handshake, MapPin } from "lucide-react";
+import { Handshake } from "lucide-react";
+import { CustomChevronRight, CustomArrowRight, CustomMapPin, ThemeIconWrapper } from "@/components/ui/CustomIcons";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -26,7 +27,7 @@ const storySlides = [
           Senior Product Manager
         </motion.div>
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }} style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginTop: "1rem", color: "rgba(255,255,255,0.7)" }}>
-          <MapPin size={18} /> San Francisco, CA
+          <CustomMapPin size={18} /> San Francisco, CA
         </motion.div>
       </div>
     )
@@ -75,7 +76,7 @@ const storySlides = [
     content: (
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", padding: "2rem", textAlign: "center" }}>
         <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", bounce: 0.5 }} style={{ width: 80, height: 80, borderRadius: "50%", background: "#E8355A", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "2rem" }}>
-          <Handshake size={40} color="white" />
+          <ThemeIconWrapper icon={Handshake} size={40} color="white" accentColor="rgba(255,255,255,0.6)" />
         </motion.div>
         <motion.h2 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} style={{ fontFamily: "var(--font-display)", fontSize: "3rem", fontWeight: 800, marginBottom: "1rem" }}>
           Let's talk.
@@ -87,7 +88,7 @@ const storySlides = [
           initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }} 
           style={{ padding: "1.25rem 2.5rem", background: "white", color: "#050014", fontSize: "1.125rem", fontWeight: 700, borderRadius: 999, border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: "0.75rem", boxShadow: "0 8px 32px rgba(255,255,255,0.2)" }}
         >
-          Contact Alex <ArrowRight size={20} />
+          Contact Alex <CustomArrowRight size={20} />
         </motion.button>
       </div>
     )
@@ -199,10 +200,10 @@ export default function WebStoryPlayer() {
         
         {/* Navigation Hints */}
         <div style={{ position: "absolute", top: "50%", left: 8, transform: "translateY(-50%)", width: 24, height: 24, borderRadius: "50%", background: "rgba(0,0,0,0.2)", display: "flex", alignItems: "center", justifyContent: "center", color: "rgba(255,255,255,0.5)", zIndex: 10, pointerEvents: "none" }}>
-          <ChevronRight size={16} style={{ transform: "rotate(180deg)" }} />
+          <CustomChevronRight size={16} style={{ transform: "rotate(180deg)" }} />
         </div>
         <div style={{ position: "absolute", top: "50%", right: 8, transform: "translateY(-50%)", width: 24, height: 24, borderRadius: "50%", background: "rgba(0,0,0,0.2)", display: "flex", alignItems: "center", justifyContent: "center", color: "rgba(255,255,255,0.5)", zIndex: 10, pointerEvents: "none" }}>
-          <ChevronRight size={16} />
+          <CustomChevronRight size={16} />
         </div>
 
       </div>

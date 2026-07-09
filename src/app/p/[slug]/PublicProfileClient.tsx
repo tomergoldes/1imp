@@ -1,7 +1,8 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Download, Mail, MapPin, Briefcase, ChevronRight } from "lucide-react";
+import { Download } from "lucide-react";
+import { CustomMail, CustomMapPin, CustomBriefcase, CustomChevronRight, ThemeIconWrapper } from "@/components/ui/CustomIcons";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -20,6 +21,7 @@ type ProfileProps = {
       date: string;
       bullets: string[];
     }[];
+    videoUrl: string | null;
   };
 };
 
@@ -32,12 +34,20 @@ export default function PublicProfileClient({ profile }: ProfileProps) {
         
         {/* ── Hero Zone ── */}
         <section style={{ marginBottom: "3.5rem" }}>
-          <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.5 }}
-            style={{ width: 110, height: 110, borderRadius: 24, overflow: "hidden", marginBottom: "1.5rem", boxShadow: "0 8px 24px rgba(16,0,48,0.12)" }}>
-            <div style={{ width: "100%", height: "100%", background: "linear-gradient(135deg, #6361B8, #E8355A)", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontSize: "2.5rem", fontWeight: 700, fontFamily: "var(--font-display)" }}>
-              {profile.name.charAt(0)}
-            </div>
-          </motion.div>
+          
+          {profile.videoUrl ? (
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.5 }}
+              style={{ width: "100%", aspectRatio: "16/9", borderRadius: 24, overflow: "hidden", marginBottom: "2rem", boxShadow: "0 12px 32px rgba(16,0,48,0.15)", background: "#000" }}>
+              <video src={profile.videoUrl} controls autoPlay muted style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            </motion.div>
+          ) : (
+            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.5 }}
+              style={{ width: 110, height: 110, borderRadius: 24, overflow: "hidden", marginBottom: "1.5rem", boxShadow: "0 8px 24px rgba(16,0,48,0.12)" }}>
+              <div style={{ width: "100%", height: "100%", background: "linear-gradient(135deg, #6361B8, #E8355A)", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontSize: "2.5rem", fontWeight: 700, fontFamily: "var(--font-display)" }}>
+                {profile.name.charAt(0)}
+              </div>
+            </motion.div>
+          )}
           
           <motion.h1 initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.5 }}
             style={{ fontFamily: "var(--font-display)", fontSize: "2.5rem", fontWeight: 800, letterSpacing: "-0.03em", marginBottom: "0.25rem" }}>
@@ -46,8 +56,8 @@ export default function PublicProfileClient({ profile }: ProfileProps) {
           
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.5 }}
             style={{ display: "flex", alignItems: "center", gap: "1rem", color: "#555570", fontSize: "0.95rem", fontWeight: 500, marginBottom: "1.5rem" }}>
-            <span style={{ display: "flex", alignItems: "center", gap: "0.3rem" }}><Briefcase size={16} /> {profile.role}</span>
-            <span style={{ display: "flex", alignItems: "center", gap: "0.3rem" }}><MapPin size={16} /> {profile.location}</span>
+            <span style={{ display: "flex", alignItems: "center", gap: "0.3rem" }}><CustomBriefcase size={16} /> {profile.role}</span>
+            <span style={{ display: "flex", alignItems: "center", gap: "0.3rem" }}><CustomMapPin size={16} /> {profile.location}</span>
           </motion.div>
 
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.5 }}
@@ -102,7 +112,7 @@ export default function PublicProfileClient({ profile }: ProfileProps) {
                 <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: "0.5rem" }}>
                   {exp.bullets.map((bullet, j) => (
                     <li key={j} style={{ fontSize: "0.95rem", color: "#444466", lineHeight: 1.6, position: "relative", paddingLeft: "1.25rem" }}>
-                      <ChevronRight size={14} style={{ position: "absolute", left: 0, top: 4, color: "#E8355A" }} />
+                      <CustomChevronRight size={14} style={{ position: "absolute", left: 0, top: 4, color: "#E8355A" }} />
                       {bullet}
                     </li>
                   ))}
@@ -128,12 +138,12 @@ export default function PublicProfileClient({ profile }: ProfileProps) {
         style={{ position: "fixed", bottom: 24, left: "50%", transform: "translateX(-50%)", zIndex: 100, display: "flex", gap: "0.75rem", background: "rgba(255,255,255,0.9)", backdropFilter: "blur(12px)", padding: "0.5rem", borderRadius: 999, boxShadow: "0 8px 32px rgba(16,0,48,0.15)", border: "1px solid rgba(16,0,48,0.08)" }}>
         
         <button style={{ display: "flex", alignItems: "center", gap: "0.4rem", padding: "0.75rem 1.25rem", background: "white", border: "1px solid rgba(16,0,48,0.1)", borderRadius: 999, fontSize: "0.9rem", fontWeight: 600, color: "#100030", cursor: "pointer", boxShadow: "0 2px 8px rgba(16,0,48,0.04)" }}>
-          <Download size={16} />
+          <ThemeIconWrapper icon={Download} size={16} color="currentColor" />
           <span className="hide-mobile">Download</span> PDF
         </button>
         
         <a href={`mailto:hello@${profile.slug}.com?subject=Saw your 1IMP Profile`} style={{ display: "flex", alignItems: "center", gap: "0.4rem", padding: "0.75rem 1.75rem", background: "#100030", border: "none", borderRadius: 999, fontSize: "0.9rem", fontWeight: 600, color: "white", cursor: "pointer", textDecoration: "none", boxShadow: "0 4px 12px rgba(16,0,48,0.2)" }}>
-          <Mail size={16} />
+          <CustomMail size={16} />
           Contact <span className="hide-mobile">{profile.name.split(" ")[0]}</span>
         </a>
       </motion.div>

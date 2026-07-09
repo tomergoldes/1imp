@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
+import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 const roles = [
   "Software Engineer", "Product Manager", "Designer", "Marketing",
@@ -13,12 +15,36 @@ export default function SignupPage() {
   const [step, setStep] = useState(1); // 1 = account, 2 = role selection
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
+  const [password, setPassword] = useState("");
   const [selectedRole, setSelectedRole] = useState("");
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   const handleStep1 = async (e: React.FormEvent) => {
     e.preventDefault();
-    setStep(2);
+    setLoading(true);
+    try {
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, password }),
+      });
+      if (!res.ok) throw new Error(await res.text());
+      
+      const signInRes = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+      });
+
+      if (signInRes?.error) throw new Error(signInRes.error);
+      
+      setStep(2);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Registration failed");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleStep2 = async () => {
@@ -139,6 +165,7 @@ export default function SignupPage() {
                   {[
                     { label: "Full name", value: name, set: setName, type: "text", placeholder: "Alex Johnson" },
                     { label: "Work email", value: email, set: setEmail, type: "email", placeholder: "alex@company.com" },
+                    { label: "Password", value: password, set: setPassword, type: "password", placeholder: "••••••••" },
                   ].map(field => (
                     <div key={field.label} style={{ marginBottom: "1rem" }}>
                       <label style={{ display: "block", fontSize: "0.8125rem", fontWeight: 600, color: "#100030", marginBottom: "0.4rem" }}>
@@ -163,13 +190,13 @@ export default function SignupPage() {
                     </div>
                   ))}
 
-                  <button type="submit" style={{
+                  <button type="submit" disabled={loading} style={{
                     width: "100%", padding: "0.8rem 1.5rem",
-                    background: "#100030", color: "white", borderRadius: 10, border: "none",
-                    fontSize: "0.9375rem", fontWeight: 600, fontFamily: "var(--font-body)", cursor: "pointer",
+                    background: loading ? "#ccc" : "#100030", color: "white", borderRadius: 10, border: "none",
+                    fontSize: "0.9375rem", fontWeight: 600, fontFamily: "var(--font-body)", cursor: loading ? "not-allowed" : "pointer",
                     transition: "opacity 150ms",
                   }}>
-                    Continue →
+                    {loading ? "Creating account..." : "Continue →"}
                   </button>
                 </form>
 

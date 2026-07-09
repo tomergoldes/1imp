@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 40" fill="none">
+  <!-- U icon -->
+  <rect width="28" height="28" x="0" y="6" rx="7" fill="#0055FF"/>
+  <path d="M8 11 L8 23 Q8 28 14 28 Q20 28 20 23 L20 11" stroke="white" stroke-width="3" stroke-linecap="round" fill="none"/>
+  <!-- upside text -->
+  <text x="34" y="27" font-family="Arial, sans-serif" font-weight="700" font-size="18" fill="#0055FF">upside</text>
+</svg>

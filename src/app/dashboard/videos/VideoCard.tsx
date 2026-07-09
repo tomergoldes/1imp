@@ -1,0 +1,93 @@
+"use client";
+
+import { Video as VideoModel } from "@prisma/client";
+import { Download, Link as LinkIcon, Loader2, PlayCircle } from "lucide-react";
+import { motion } from "framer-motion";
+
+export function VideoCard({ video }: { video: VideoModel }) {
+  const isPending = video.status === "PENDING";
+  const isFailed = video.status === "FAILED";
+  
+  return (
+    <motion.div 
+      initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }}
+      style={{
+        background: "white", borderRadius: 20, overflow: "hidden",
+        border: "1px solid rgba(16,0,48,0.06)", boxShadow: "0 8px 24px rgba(16,0,48,0.04)",
+        display: "flex", flexDirection: "column"
+      }}
+    >
+      {/* Thumbnail Area */}
+      <div style={{ position: "relative", width: "100%", aspectRatio: "16/9", background: isPending ? "linear-gradient(135deg, #100030, #2A1F45)" : "#000" }}>
+        {isPending ? (
+          <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", color: "white" }}>
+            <Loader2 size={32} className="animate-spin" color="#E8355A" style={{ marginBottom: "0.5rem" }} />
+            <span style={{ fontSize: "0.875rem", fontWeight: 600 }}>Rendering...</span>
+          </div>
+        ) : isFailed ? (
+          <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", color: "#E8355A", background: "rgba(232,53,90,0.1)" }}>
+            <span style={{ fontWeight: 600 }}>Render Failed</span>
+          </div>
+        ) : (
+          <>
+            <video src={video.videoUrl} style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.8 }} />
+            <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <PlayCircle size={48} color="white" style={{ filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.5))", cursor: "pointer" }} />
+            </div>
+          </>
+        )}
+        
+        {/* Status Badge */}
+        <div style={{
+          position: "absolute", top: "1rem", right: "1rem",
+          padding: "4px 10px", borderRadius: 100, fontSize: "0.75rem", fontWeight: 700,
+          background: isPending ? "rgba(255,255,255,0.2)" : isFailed ? "#E8355A" : "#34A853",
+          color: "white", backdropFilter: "blur(4px)"
+        }}>
+          {video.status}
+        </div>
+      </div>
+
+      {/* Details Area */}
+      <div style={{ padding: "1.5rem", flexGrow: 1, display: "flex", flexDirection: "column" }}>
+        <h3 style={{ margin: "0 0 0.5rem 0", fontSize: "1.125rem", color: "#100030", fontFamily: "var(--font-display)", fontWeight: 700 }}>
+          Professional Intro
+        </h3>
+        <p style={{ margin: 0, color: "#9999AA", fontSize: "0.875rem", flexGrow: 1 }}>
+          {new Date(video.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+        </p>
+
+        {/* Actions */}
+        <div style={{ display: "flex", gap: "0.75rem", marginTop: "1.5rem" }}>
+          <button 
+            disabled={isPending || isFailed}
+            onClick={() => window.open(video.videoUrl, '_blank')}
+            style={{
+              flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem",
+              padding: "0.6rem", background: "rgba(99,97,184,0.1)", color: "#6361B8",
+              border: "none", borderRadius: 8, fontSize: "0.875rem", fontWeight: 600,
+              cursor: isPending ? "not-allowed" : "pointer", opacity: isPending ? 0.5 : 1
+            }}
+          >
+            <Download size={16} /> Download
+          </button>
+          <button 
+            disabled={isPending || isFailed}
+            onClick={() => {
+              navigator.clipboard.writeText(video.videoUrl);
+              alert("Video URL copied to clipboard!");
+            }}
+            style={{
+              flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem",
+              padding: "0.6rem", background: "rgba(16,0,48,0.05)", color: "#100030",
+              border: "none", borderRadius: 8, fontSize: "0.875rem", fontWeight: 600,
+              cursor: isPending ? "not-allowed" : "pointer", opacity: isPending ? 0.5 : 1
+            }}
+          >
+            <LinkIcon size={16} /> Copy Link
+          </button>
+        </div>
+      </div>
+    </motion.div>
+  );
+}

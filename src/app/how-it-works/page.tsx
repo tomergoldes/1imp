@@ -2,47 +2,49 @@
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
 import Link from "next/link";
+import { FileText, Sparkles, Paintbrush, Video, Link2, BarChart3 } from "lucide-react";
+import Image from "next/image";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
 const steps = [
   {
-    num: "01", icon: "📄",
+    num: "01", icon: <Image src="/3d-icons/icon_document_1783329144880.png" width={56} height={56} alt="Upload" style={{ mixBlendMode: "multiply", transform: "scale(1.2)" }} />,
     title: "Upload your career story",
     desc: "Drop your resume — PDF, Word, or plain text. Our AI reads every word and extracts the full picture of who you are professionally. Name, title, experience, skills, achievements. All in seconds.",
     detail: "Supports 500+ resume formats. No reformatting required.",
     accent: "#6361B8",
   },
   {
-    num: "02", icon: "✦",
+    num: "02", icon: <Image src="/3d-icons/icon_magic_wand_1783329176369.png" width={56} height={56} alt="AI" style={{ mixBlendMode: "multiply", transform: "scale(1.2)" }} />,
     title: "AI crafts your First Impression",
     desc: "Our AI writes your AI Summary — a 3-4 sentence narrative that captures the real you. Clear, compelling, and recruiter-ready. Not a list of job duties. A story of your impact.",
     detail: "Powered by GPT-4o. Editable. Regeneratable. Yours.",
     accent: "#E8355A",
   },
   {
-    num: "03", icon: "🎨",
+    num: "03", icon: <Image src="/3d-icons/icon_palette_1783329152357.png" width={56} height={56} alt="Build" style={{ mixBlendMode: "multiply", transform: "scale(1.2)" }} />,
     title: "Build your Career Profile",
     desc: "In the split-screen editor, you see exactly what a recruiter will see — in real time. Refine your AI Summary. Add skills. Edit experience bullets. Choose your theme. Every change is instant.",
     detail: "Desktop + mobile preview. 12 premium themes. Autosave.",
     accent: "#6361B8",
   },
   {
-    num: "04", icon: "🎬",
+    num: "04", icon: <Image src="/3d-icons/icon_camera_1783329168872.png" width={56} height={56} alt="Record" style={{ mixBlendMode: "multiply", transform: "scale(1.2)" }} />,
     title: "Record your Career Pitch (optional)",
     desc: "Add a 60-second Career Pitch — an AI-coached, teleprompter-guided video that lets your personality land before you even get to the interview. Optional, but powerful.",
     detail: "AI writes the script. You record it once. It works forever.",
     accent: "#E8355A",
   },
   {
-    num: "05", icon: "🔗",
+    num: "05", icon: <Image src="/3d-icons/icon_chain_link_1783329003940.png" width={56} height={56} alt="Link" style={{ mixBlendMode: "multiply", transform: "scale(1.2)" }} />,
     title: "Share your Impression Link",
     desc: "Copy your personal Impression Link — 1imp.io/yourname — and send it everywhere. LinkedIn messages, job applications, email signatures, QR codes. One link. Every platform.",
     detail: "Beautiful Open Graph preview. Instant load. No account required to view.",
     accent: "#6361B8",
   },
   {
-    num: "06", icon: "📊",
+    num: "06", icon: <Image src="/3d-icons/icon_bar_chart_1783329275586.png" width={56} height={56} alt="Analytics" style={{ mixBlendMode: "multiply", transform: "scale(1.2)" }} />,
     title: "Know who's paying attention",
     desc: "Get real-time notifications when a recruiter opens your Career Profile. See which companies are looking. See which sections they spent time on. Turn anxiety into intelligence.",
     detail: "Company identification, time-on-page, section heatmap. (Pro)",
@@ -86,13 +88,18 @@ export default function HowItWorksPage() {
               initial={{ opacity: 0, x: i % 2 === 0 ? -24 : 24 }}
               animate={inView ? { opacity: 1, x: 0 } : {}}
               transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
-              style={{ display: "grid", gridTemplateColumns: "64px 1fr", gap: "1.5rem", marginBottom: "3rem", alignItems: "flex-start" }}
+              style={{ display: "grid", gridTemplateColumns: "80px 1fr", gap: "1.5rem", marginBottom: "3rem", alignItems: "flex-start" }}
             >
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-                <div style={{ width: 52, height: 52, borderRadius: 14, background: `${step.accent}15`, border: `1.5px solid ${step.accent}30`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.4rem", marginBottom: "0.5rem" }}>
-                  {step.icon}
-                </div>
-                {i < steps.length - 1 && <div style={{ width: 2, height: 48, background: "rgba(99,82,138,0.15)", borderRadius: 1 }} />}
+                    <div style={{
+                      width: 80, height: 80, borderRadius: 24,
+                      background: "white", border: "1px solid rgba(99,97,184,0.15)",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      boxShadow: "0 8px 24px rgba(16,0,48,0.06)", overflow: "hidden"
+                    }}>
+                      {step.icon}
+                    </div>
+                {i < steps.length - 1 && <div style={{ width: 2, height: 48, background: "rgba(99,82,138,0.15)", borderRadius: 1, marginTop: "0.5rem" }} />}
               </div>
               <div style={{ background: "white", borderRadius: 16, padding: "1.5rem", border: "1px solid rgba(99,82,138,0.12)", boxShadow: "0 2px 12px rgba(16,0,48,0.05)" }}>
                 <span style={{ fontSize: "0.65rem", fontWeight: 700, color: step.accent, letterSpacing: "0.1em", textTransform: "uppercase" }}>{step.num}</span>

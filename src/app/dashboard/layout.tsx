@@ -4,11 +4,13 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
-import { LayoutDashboard, PenTool, Settings, LogOut, Menu, X } from "lucide-react";
+import { LayoutDashboard, PenTool, Settings, LogOut, Menu, X, Video } from "lucide-react";
 import { signOut } from "next-auth/react";
+import { CreditDisplay } from "./components/CreditDisplay";
 
 const navItems = [
   { name: "Overview", href: "/dashboard", icon: LayoutDashboard },
+  { name: "Videos", href: "/dashboard/videos", icon: Video },
   { name: "Editor", href: "/editor", icon: PenTool },
   { name: "Settings", href: "/dashboard/settings", icon: Settings },
 ];
@@ -55,6 +57,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             })}
           </ul>
         </nav>
+
+        {/* Credits */}
+        <CreditDisplay />
 
         {/* User / Logout */}
         <div style={{ padding: "1.5rem 1rem", borderTop: "1px solid rgba(255,255,255,0.08)" }}>

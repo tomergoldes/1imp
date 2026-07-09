@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
+import { CustomChevronDown } from "@/components/ui/CustomIcons";
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -17,11 +18,10 @@ export default function Navbar() {
   }, []);
 
   const navLinks = [
-    { label: "How It Works", href: "/how-it-works" },
-    { label: "For Candidates", href: "/candidates" },
+    { label: "How It Works", href: "/#how-it-works" },
     { label: "For Recruiters", href: "/recruiters" },
-    { label: "Pricing", href: "/pricing" },
-    { label: "Our Story", href: "/story" },
+    { label: "Pricing", href: "/#pricing" },
+    { label: "Our Story", href: "/#our-story" },
   ];
 
   return (
@@ -70,7 +70,7 @@ export default function Navbar() {
                   padding: "0.5rem 0.75rem",
                   fontSize: "0.9375rem",
                   fontWeight: 500,
-                  color: activeHover === link.label ? "#000" : "#100030",
+                  color: activeHover === link.label ? "#5858D7" : "#100030",
                   textDecoration: "none",
                   transition: "color 150ms ease",
                   fontFamily: "var(--font-body)",
@@ -81,18 +81,25 @@ export default function Navbar() {
               >
                 {link.label}
                 {/* Adding Chevron for the Voyantis look (except maybe the last one, but let's add to all for consistency) */}
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.6, marginTop: "2px" }}>
-                  <polyline points="6 9 12 15 18 9"></polyline>
-                </svg>
+                <CustomChevronDown 
+                  size={14} 
+                  color="#100030" 
+                  style={{ 
+                    opacity: 0.6, 
+                    marginTop: "2px",
+                    transform: activeHover === link.label ? "rotate(180deg)" : "rotate(0deg)",
+                    transition: "transform 200ms ease"
+                  }} 
+                />
               </Link>
             ))}
           </nav>
 
           {/* ── Right side ───────────────────────────────────────────── */}
           <div style={{ display: "flex", alignItems: "center", gap: "1rem", flexShrink: 0 }} className="imp-nav-right">
-            {/* Log In */}
-            <Link href="/login" style={{
-              fontSize: "0.9375rem", fontWeight: 500,
+            {/* Sign up */}
+            <Link href="/signup" style={{
+              fontSize: "0.9375rem", fontWeight: 600,
               color: "#100030",
               textDecoration: "none",
               fontFamily: "var(--font-body)", transition: "color 150ms",
@@ -101,14 +108,14 @@ export default function Navbar() {
               onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = "#E8355A"; }}
               onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = "#100030"; }}
             >
-              Log In
+              Sign up
             </Link>
 
-            {/* Primary CTA */}
-            <Link href="/create" style={{
+            {/* Log in */}
+            <Link href="/login" style={{
               display: "inline-flex", alignItems: "center",
               padding: "0.6rem 1.4rem",
-              background: "#0A001F", // Very dark navy/purple matching Voyantis CTA
+              background: "#0A001F", 
               color: "white", borderRadius: 9999,
               fontSize: "0.9375rem", fontWeight: 600,
               textDecoration: "none", fontFamily: "var(--font-body)",
@@ -122,7 +129,7 @@ export default function Navbar() {
                 (e.currentTarget as HTMLElement).style.background = "#0A001F";
               }}
             >
-              Create your video
+              Log in
             </Link>
           </div>
 
@@ -161,8 +168,8 @@ export default function Navbar() {
                 ))}
                 <div style={{ height: 1, background: "rgba(16,0,48,0.05)", margin: "0.5rem 0" }} />
                 <div style={{ display: "flex", gap: "0.625rem", paddingTop: "0.25rem" }}>
-                  <Link href="/login" style={{ flex: 1, textAlign: "center", padding: "0.7rem", border: "1.5px solid rgba(16,0,48,0.1)", borderRadius: 10, fontSize: "0.9rem", fontWeight: 600, color: "#100030", textDecoration: "none" }}>Log In</Link>
-                  <Link href="/create" style={{ flex: 2, textAlign: "center", padding: "0.7rem", background: "#0A001F", borderRadius: 10, fontSize: "0.9rem", fontWeight: 600, color: "white", textDecoration: "none" }}>Create your video</Link>
+                  <Link href="/signup" style={{ flex: 1, textAlign: "center", padding: "0.7rem", border: "1.5px solid rgba(16,0,48,0.1)", borderRadius: 10, fontSize: "0.9rem", fontWeight: 600, color: "#100030", textDecoration: "none" }}>Sign up</Link>
+                  <Link href="/login" style={{ flex: 1, textAlign: "center", padding: "0.7rem", background: "#0A001F", borderRadius: 10, fontSize: "0.9rem", fontWeight: 600, color: "white", textDecoration: "none" }}>Log in</Link>
                 </div>
               </div>
             </motion.div>

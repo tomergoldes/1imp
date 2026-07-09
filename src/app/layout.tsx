@@ -45,6 +45,8 @@ export const metadata: Metadata = {
   },
 };
 
+import { Toaster } from "react-hot-toast";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -57,6 +59,7 @@ export default function RootLayout({
     >
       <body className="min-h-screen antialiased">
         <AuthProvider>
+          <Toaster position="top-center" />
           {children}
         </AuthProvider>
       </body>

@@ -142,10 +142,20 @@ export default function CreateVideoPage() {
                 </p>
 
                 <div style={{ display: "flex", gap: "1rem" }}>
-                  <div style={{ 
+                  <label style={{ 
                     flex: 1, aspectRatio: "3/4", background: "rgba(255,255,255,0.03)", borderRadius: 16, border: "2px dashed rgba(255,255,255,0.1)",
                     display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "1rem", cursor: "pointer", transition: "background 200ms"
-                  }} onClick={() => updateData("photos", ["uploaded"])}>
+                  }}>
+                    <input 
+                      type="file" 
+                      accept="image/*" 
+                      style={{ display: "none" }} 
+                      onChange={(e) => {
+                        if (e.target.files && e.target.files.length > 0) {
+                          updateData("photos", ["uploaded"]);
+                        }
+                      }}
+                    />
                     {data.photos.length > 0 ? (
                       <Check size={32} color="#34A853" />
                     ) : (
@@ -156,7 +166,7 @@ export default function CreateVideoPage() {
                         <span style={{ fontWeight: 600, color: "rgba(255,255,255,0.8)" }}>Upload Photo</span>
                       </>
                     )}
-                  </div>
+                  </label>
                   <div style={{ flex: 1, aspectRatio: "3/4", background: "rgba(255,255,255,0.03)", borderRadius: 16, border: "2px dashed rgba(255,255,255,0.05)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                     <span style={{ color: "rgba(255,255,255,0.3)" }}>Optional</span>
                   </div>
