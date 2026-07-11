@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { prisma } from "@/lib/prisma";
+import { sendUpgradeSuccessfulEmail } from "@/lib/email-service";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "sk_test_mock123", {
   apiVersion: "2024-04-10" as any,
@@ -33,8 +34,45 @@ export async function POST(req: Request) {
 
     const userId = session.metadata?.userId;
     const creditsStr = session.metadata?.credits;
+    const videoId = session.metadata?.videoId;
 
-    if (userId && creditsStr) {
+    if (videoId) {
+      try {
+        // 1. Unlock video
+        const updatedVideo = await prisma.video.update({
+          where: { id: videoId },
+          data: {
+            hasWatermark: false,
+            isDownloadable: true,
+          },
+          include: { user: true }
+        });
+
+        // 2. Create a Payment record for this unlock
+        if (userId) {
+          const amount = session.amount_total ? session.amount_total / 100 : 9.99;
+          await prisma.payment.create({
+            data: {
+              userId,
+              stripeId: session.id,
+              amount,
+              creditsAdded: 0, // Video unlock, not credits
+              status: "COMPLETED",
+            }
+          });
+        }
+
+        // 3. Send email
+        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+        if (updatedVideo.user?.email) {
+          await sendUpgradeSuccessfulEmail(updatedVideo.user.email, updatedVideo.user.name || "User", `${baseUrl}/v/${videoId}`);
+        }
+        
+        console.log(`Successfully unlocked video ${videoId}`);
+      } catch (error) {
+        console.error("Failed to unlock video:", error);
+      }
+    } else if (userId && creditsStr) {
       const creditsAdded = parseInt(creditsStr, 10);
       const amount = session.amount_total ? session.amount_total / 100 : 0;
 

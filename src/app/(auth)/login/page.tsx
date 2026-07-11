@@ -146,6 +146,7 @@ export default function LoginPage() {
 
           {/* Google button */}
           <button
+            onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
             style={{
               width: "100%", display: "flex", alignItems: "center", justifyContent: "center",
               gap: "0.75rem", padding: "0.8rem 1.5rem",

@@ -3,12 +3,15 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { CustomChevronDown } from "@/components/ui/CustomIcons";
+import { useSession, signOut } from "next-auth/react";
+import { User, LogOut, LayoutDashboard, Settings, ChevronDown } from "lucide-react";
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [activeHover, setActiveHover] = useState<string | null>(null);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const { data: session } = useSession();
 
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 12);
@@ -40,10 +43,10 @@ export default function Navbar() {
         }}>
 
           {/* ── Logo ─────────────────────────────────────────────────── */}
-          <Link href="/" style={{ display: "flex", alignItems: "center", gap: "0.45rem", textDecoration: "none", flexShrink: 0 }}>
+          <Link href={session?.user ? "/dashboard" : "/"} style={{ display: "flex", alignItems: "center", gap: "0.45rem", textDecoration: "none", flexShrink: 0 }}>
             {/* Sword slash mark — blade diagonal + sweeping motion arc + tip dot */}
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              {/* Wide sweeping arc — the sword’s motion trail */}
+              {/* Wide sweeping arc — the sword's motion trail */}
               <path d="M 5 19 C 2 10 10 2 19 5" stroke="#E8355A" strokeWidth="1.1" fill="none" strokeLinecap="round" strokeOpacity="0.45"/>
               {/* The blade — clean diagonal slash */}
               <line x1="5" y1="19" x2="19" y2="5" stroke="#E8355A" strokeWidth="2.2" strokeLinecap="round"/>
@@ -80,15 +83,14 @@ export default function Navbar() {
                 onMouseLeave={() => setActiveHover(null)}
               >
                 {link.label}
-                {/* Adding Chevron for the Voyantis look (except maybe the last one, but let's add to all for consistency) */}
-                <CustomChevronDown 
-                  size={14} 
-                  color="#100030" 
+                <ChevronDown 
+                  size={13} 
                   style={{ 
-                    opacity: 0.6, 
-                    marginTop: "2px",
+                    opacity: 0.4, 
+                    marginTop: "1px",
                     transform: activeHover === link.label ? "rotate(180deg)" : "rotate(0deg)",
-                    transition: "transform 200ms ease"
+                    transition: "transform 200ms ease",
+                    flexShrink: 0
                   }} 
                 />
               </Link>
@@ -97,40 +99,127 @@ export default function Navbar() {
 
           {/* ── Right side ───────────────────────────────────────────── */}
           <div style={{ display: "flex", alignItems: "center", gap: "1rem", flexShrink: 0 }} className="imp-nav-right">
-            {/* Sign up */}
-            <Link href="/signup" style={{
-              fontSize: "0.9375rem", fontWeight: 600,
-              color: "#100030",
-              textDecoration: "none",
-              fontFamily: "var(--font-body)", transition: "color 150ms",
-              padding: "0.5rem"
-            }}
-              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = "#E8355A"; }}
-              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = "#100030"; }}
-            >
-              Sign up
-            </Link>
+            {session?.user ? (
+              <div style={{ display: "flex", alignItems: "center", gap: "1.25rem" }}>
+                <Link href="/dashboard" style={{
+                  fontSize: "0.9375rem", fontWeight: 600, color: "#100030", textDecoration: "none", fontFamily: "var(--font-body)", transition: "color 150ms",
+                }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = "#E8355A"; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = "#100030"; }}
+                >
+                  Dashboard
+                </Link>
 
-            {/* Log in */}
-            <Link href="/login" style={{
-              display: "inline-flex", alignItems: "center",
-              padding: "0.6rem 1.4rem",
-              background: "#0A001F", 
-              color: "white", borderRadius: 9999,
-              fontSize: "0.9375rem", fontWeight: 600,
-              textDecoration: "none", fontFamily: "var(--font-body)",
-              transition: "background 150ms ease",
-              whiteSpace: "nowrap",
-            }}
-              onMouseEnter={e => {
-                (e.currentTarget as HTMLElement).style.background = "#190040";
-              }}
-              onMouseLeave={e => {
-                (e.currentTarget as HTMLElement).style.background = "#0A001F";
-              }}
-            >
-              Log in
-            </Link>
+                <div style={{ position: "relative" }}>
+                  <button 
+                    onClick={() => setUserMenuOpen(!userMenuOpen)}
+                    style={{
+                      display: "flex", alignItems: "center", gap: "0.5rem",
+                      padding: "4px 12px 4px 4px", borderRadius: 999,
+                      background: "white", color: "#100030",
+                      border: "1px solid rgba(16,0,48,0.1)", cursor: "pointer",
+                      fontFamily: "var(--font-body)", fontWeight: 600,
+                      boxShadow: "0 2px 10px rgba(0,0,0,0.02)",
+                      transition: "all 0.2s"
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.borderColor = "rgba(16,0,48,0.2)"}
+                    onMouseLeave={e => e.currentTarget.style.borderColor = "rgba(16,0,48,0.1)"}
+                  >
+                    <div style={{
+                      width: 32, height: 32, borderRadius: "50%",
+                      background: "linear-gradient(135deg, #E8355A 0%, #6361B8 100%)",
+                      color: "white", display: "flex", alignItems: "center", justifyContent: "center",
+                      fontSize: "1rem", fontFamily: "var(--font-display)"
+                    }}>
+                      {session.user.name ? session.user.name.charAt(0).toUpperCase() : <User size={16} />}
+                    </div>
+                    <span style={{ fontSize: "0.875rem" }}>
+                      {session.user.name ? session.user.name.split(" ")[0] : "Account"}
+                    </span>
+                    <ChevronDown size={14} style={{ opacity: 0.5, transform: userMenuOpen ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }} />
+                  </button>
+
+                  <AnimatePresence>
+                    {userMenuOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                        transition={{ duration: 0.15 }}
+                        style={{
+                          position: "absolute", top: "calc(100% + 10px)", right: 0,
+                          background: "white", borderRadius: 12, padding: "0.5rem",
+                          boxShadow: "0 10px 40px rgba(16,0,48,0.1)", border: "1px solid rgba(16,0,48,0.05)",
+                          minWidth: 200, display: "flex", flexDirection: "column", gap: "0.25rem"
+                        }}
+                      >
+                        <div style={{ padding: "0.5rem 0.75rem", borderBottom: "1px solid rgba(16,0,48,0.05)", marginBottom: "0.25rem" }}>
+                          <div style={{ fontWeight: 600, color: "#100030", fontSize: "0.9rem" }}>{session.user.name || "User"}</div>
+                          <div style={{ fontSize: "0.75rem", color: "#9999AA", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{session.user.email}</div>
+                        </div>
+                        
+                        <Link href="/dashboard" onClick={() => setUserMenuOpen(false)} style={{ display: "flex", alignItems: "center", gap: "0.5rem", padding: "0.6rem 0.75rem", color: "#100030", textDecoration: "none", fontSize: "0.875rem", fontWeight: 500, borderRadius: 8 }} onMouseEnter={e => e.currentTarget.style.background = "rgba(16,0,48,0.04)"} onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
+                          <LayoutDashboard size={16} /> Dashboard
+                        </Link>
+                        <Link href="/dashboard/settings" onClick={() => setUserMenuOpen(false)} style={{ display: "flex", alignItems: "center", gap: "0.5rem", padding: "0.6rem 0.75rem", color: "#100030", textDecoration: "none", fontSize: "0.875rem", fontWeight: 500, borderRadius: 8 }} onMouseEnter={e => e.currentTarget.style.background = "rgba(16,0,48,0.04)"} onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
+                          <Settings size={16} /> Settings
+                        </Link>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+
+                <button 
+                  onClick={() => signOut()} 
+                  style={{
+                    display: "flex", alignItems: "center", gap: "0.4rem",
+                    padding: "0.5rem 0.875rem", borderRadius: 999,
+                    background: "rgba(232,53,90,0.08)", color: "#E8355A",
+                    border: "none", cursor: "pointer",
+                    fontSize: "0.875rem", fontWeight: 600,
+                    fontFamily: "var(--font-body)",
+                    transition: "background 150ms ease"
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.background = "rgba(232,53,90,0.15)"}
+                  onMouseLeave={e => e.currentTarget.style.background = "rgba(232,53,90,0.08)"}
+                >
+                  <LogOut size={14} /> Log out
+                </button>
+              </div>
+            ) : (
+              <>
+                {/* Sign up */}
+                <Link href="/signup" style={{
+                  fontSize: "0.9375rem", fontWeight: 600,
+                  color: "#100030",
+                  textDecoration: "none",
+                  fontFamily: "var(--font-body)", transition: "color 150ms",
+                  padding: "0.5rem"
+                }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = "#E8355A"; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = "#100030"; }}
+                >
+                  Sign up
+                </Link>
+
+                {/* Log in */}
+                <Link href="/login" style={{
+                  display: "inline-flex", alignItems: "center",
+                  padding: "0.6rem 1.4rem",
+                  background: "#0A001F", 
+                  color: "white", borderRadius: 9999,
+                  fontSize: "0.9375rem", fontWeight: 600,
+                  textDecoration: "none", fontFamily: "var(--font-body)",
+                  transition: "background 150ms ease",
+                  whiteSpace: "nowrap",
+                }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "#190040"; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "#0A001F"; }}
+                >
+                  Log in
+                </Link>
+              </>
+            )}
           </div>
 
           {/* ── Mobile hamburger ─────────────────────────────────────── */}
@@ -167,10 +256,21 @@ export default function Navbar() {
                   </Link>
                 ))}
                 <div style={{ height: 1, background: "rgba(16,0,48,0.05)", margin: "0.5rem 0" }} />
-                <div style={{ display: "flex", gap: "0.625rem", paddingTop: "0.25rem" }}>
-                  <Link href="/signup" style={{ flex: 1, textAlign: "center", padding: "0.7rem", border: "1.5px solid rgba(16,0,48,0.1)", borderRadius: 10, fontSize: "0.9rem", fontWeight: 600, color: "#100030", textDecoration: "none" }}>Sign up</Link>
-                  <Link href="/login" style={{ flex: 1, textAlign: "center", padding: "0.7rem", background: "#0A001F", borderRadius: 10, fontSize: "0.9rem", fontWeight: 600, color: "white", textDecoration: "none" }}>Log in</Link>
-                </div>
+                {session?.user ? (
+                  <>
+                    <div style={{ padding: "0.5rem 0.875rem" }}>
+                      <div style={{ fontWeight: 600, color: "#100030" }}>{session.user.name || "User"}</div>
+                      <div style={{ fontSize: "0.85rem", color: "#9999AA" }}>{session.user.email}</div>
+                    </div>
+                    <Link href="/dashboard" onClick={() => setMobileOpen(false)} style={{ padding: "0.7rem 0.875rem", fontSize: "1rem", fontWeight: 500, color: "#100030", textDecoration: "none", borderRadius: 10 }}>Dashboard</Link>
+                    <button onClick={() => { signOut(); setMobileOpen(false); }} style={{ padding: "0.7rem 0.875rem", fontSize: "1rem", fontWeight: 500, color: "#E8355A", background: "none", border: "none", textAlign: "left", cursor: "pointer", borderRadius: 10 }}>Log out</button>
+                  </>
+                ) : (
+                  <div style={{ display: "flex", gap: "0.625rem", paddingTop: "0.25rem" }}>
+                    <Link href="/signup" style={{ flex: 1, textAlign: "center", padding: "0.7rem", border: "1.5px solid rgba(16,0,48,0.1)", borderRadius: 10, fontSize: "0.9rem", fontWeight: 600, color: "#100030", textDecoration: "none" }}>Sign up</Link>
+                    <Link href="/login" style={{ flex: 1, textAlign: "center", padding: "0.7rem", background: "#0A001F", borderRadius: 10, fontSize: "0.9rem", fontWeight: 600, color: "white", textDecoration: "none" }}>Log in</Link>
+                  </div>
+                )}
               </div>
             </motion.div>
           )}

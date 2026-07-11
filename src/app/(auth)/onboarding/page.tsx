@@ -3,41 +3,144 @@
 import { useState, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-
-type UploadState = "idle" | "dragging" | "uploading" | "done" | "error";
+import { useRouter } from "next/navigation";
+import { ChevronRight, ChevronLeft, UploadCloud, Image as ImageIcon, Briefcase, Target, Users, Loader2 } from "lucide-react";
 
 export default function OnboardingPage() {
-  const [uploadState, setUploadState] = useState<UploadState>("idle");
-  const [fileName, setFileName] = useState("");
-  const [progress, setProgress] = useState(0);
-  const fileRef = useRef<HTMLInputElement>(null);
+  const router = useRouter();
+  
+  // Step state
+  const [currentStep, setCurrentStep] = useState(1);
+  const [errorMsg, setErrorMsg] = useState("");
+  const [isGenerating, setIsGenerating] = useState(false);
 
-  const processFile = useCallback(async (file: File) => {
+  // Data state
+  const [answers, setAnswers] = useState({ goal: "", audience: "", tone: "" });
+  const [cvText, setCvText] = useState("");
+  const [photoBase64, setPhotoBase64] = useState("");
+  const [videoStyle, setVideoStyle] = useState("");
+
+  // Resume Upload State
+  const [cvFileName, setCvFileName] = useState("");
+  const [cvProgress, setCvProgress] = useState(0);
+  const [isCvDragging, setIsCvDragging] = useState(false);
+  const [showTextInput, setShowTextInput] = useState(false);
+  const cvFileRef = useRef<HTMLInputElement>(null);
+
+  // Photo Upload State
+  const [photoFileName, setPhotoFileName] = useState("");
+  const photoFileRef = useRef<HTMLInputElement>(null);
+
+  // Helpers
+  const readFileAsText = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => resolve(e.target?.result as string || "");
+      reader.onerror = () => reject(new Error("Failed to read file"));
+      reader.readAsText(file);
+    });
+  };
+
+  const readFileAsDataURL = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => resolve(e.target?.result as string || "");
+      reader.onerror = () => reject(new Error("Failed to read file"));
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const processCvFile = async (file: File) => {
     if (!file) return;
-    setFileName(file.name);
-    setUploadState("uploading");
-    setProgress(0);
+    setCvFileName(file.name);
+    setCvProgress(10);
+    setErrorMsg("");
 
-    // Simulate upload + AI parsing progress
-    const steps = [15, 35, 55, 72, 88, 100];
-    for (const p of steps) {
-      await new Promise(r => setTimeout(r, 400 + Math.random() * 300));
-      setProgress(p);
+    try {
+      setCvProgress(50);
+      const text = await readFileAsText(file);
+      setCvProgress(100);
+      
+      if (!text || text.trim() === "") {
+        setErrorMsg("Could not extract enough text from this file. Please paste your CV as text instead.");
+        setShowTextInput(true);
+        return;
+      }
+      setCvText(text);
+    } catch {
+      setErrorMsg("Failed to read file. Please paste your CV as text.");
+      setShowTextInput(true);
     }
-    await new Promise(r => setTimeout(r, 300));
-    setUploadState("done");
-  }, []);
+  };
 
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    setUploadState("idle");
-    const file = e.dataTransfer.files[0];
-    if (file) processFile(file);
-  }, [processFile]);
+  const processPhotoFile = async (file: File) => {
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      setErrorMsg("Please upload a valid image file (JPG/PNG).");
+      return;
+    }
+    setPhotoFileName(file.name);
+    setErrorMsg("");
+    try {
+      const base64 = await readFileAsDataURL(file);
+      setPhotoBase64(base64);
+    } catch {
+      setErrorMsg("Failed to read image file.");
+    }
+  };
 
-  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) processFile(file);
+  const handleNextStep = () => {
+    setErrorMsg("");
+    if (currentStep === 1) {
+      if (!answers.goal || !answers.audience || !answers.tone) {
+        setErrorMsg("Please answer all questions to proceed.");
+        return;
+      }
+    } else if (currentStep === 2) {
+      const textToSave = cvText || (document.getElementById("cv-textarea") as HTMLTextAreaElement)?.value || "";
+      if (!textToSave || textToSave.trim() === "") {
+        setErrorMsg("Please upload your CV or paste it as text.");
+        return;
+      }
+      setCvText(textToSave);
+    } else if (currentStep === 3) {
+      if (!photoBase64) {
+        setErrorMsg("Please upload at least 1 photo to animate your face.");
+        return;
+      }
+    }
+    setCurrentStep(s => Math.min(s + 1, 4));
+  };
+
+  const handleGenerate = async () => {
+    if (!videoStyle) {
+      setErrorMsg("Please select a video style.");
+      return;
+    }
+
+    setIsGenerating(true);
+    setErrorMsg("");
+
+    try {
+      const res = await fetch("/api/video/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          cvText, 
+          answers, 
+          photoBase64, 
+          style: videoStyle 
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to generate video");
+
+      router.push(`/v/${data.videoId}?processing=true`);
+    } catch (err: any) {
+      setErrorMsg(err.message || "Something went wrong.");
+      setIsGenerating(false);
+    }
   };
 
   return (
@@ -45,182 +148,224 @@ export default function OnboardingPage() {
       minHeight: "100vh", background: "linear-gradient(135deg, #F0EEFB 0%, #E4E0F4 60%, #ECEEF8 100%)",
       display: "flex", flexDirection: "column",
     }}>
-
       {/* Top bar */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "1.25rem 2rem", borderBottom: "1px solid rgba(99,82,138,0.12)", background: "rgba(255,255,255,0.7)", backdropFilter: "blur(12px)" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+        <Link href="/dashboard" style={{ display: "flex", alignItems: "center", gap: "0.5rem", textDecoration: "none" }}>
           <svg width="24" height="24" viewBox="0 0 30 30" fill="none">
             <circle cx="15" cy="15" r="13" stroke="#E8355A" strokeWidth="2"/>
             <circle cx="15" cy="15" r="8" stroke="#E8355A" strokeWidth="1.5" strokeOpacity="0.35"/>
             <circle cx="15" cy="15" r="3.5" fill="#E8355A"/>
           </svg>
           <span style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "1.1rem", color: "#100030", letterSpacing: "0.01em" }}>1IMP</span>
-        </div>
-
-        {/* Progress steps */}
+        </Link>
         <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-          {["Upload", "AI Crafts", "Preview", "Share"].map((label, i) => (
+          {["Questions", "Resume", "Photo", "Style"].map((label, i) => (
             <div key={label} style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "0.35rem" }}>
                 <div style={{
                   width: 24, height: 24, borderRadius: "50%", flexShrink: 0,
-                  background: i === 0 ? "#6361B8" : "rgba(99,97,184,0.15)",
+                  background: currentStep >= i + 1 ? "#6361B8" : "rgba(99,97,184,0.15)",
                   display: "flex", alignItems: "center", justifyContent: "center",
                   fontSize: "0.65rem", fontWeight: 700,
-                  color: i === 0 ? "white" : "rgba(99,97,184,0.5)",
+                  color: currentStep >= i + 1 ? "white" : "rgba(99,97,184,0.5)",
                 }}>
                   {i + 1}
                 </div>
-                <span style={{ fontSize: "0.78rem", fontWeight: i === 0 ? 600 : 400, color: i === 0 ? "#100030" : "#9999AA" }} className="step-label">{label}</span>
+                <span className="step-label" style={{ fontSize: "0.78rem", fontWeight: currentStep === i + 1 ? 600 : 400, color: currentStep >= i + 1 ? "#100030" : "#9999AA" }}>{label}</span>
               </div>
-              {i < 3 && <div style={{ width: 24, height: 1, background: "rgba(99,82,138,0.2)" }} className="step-line" />}
+              {i < 3 && <div className="step-line" style={{ width: 24, height: 1, background: currentStep > i + 1 ? "#6361B8" : "rgba(99,82,138,0.2)" }} />}
             </div>
           ))}
         </div>
-
-        <Link href="/login" style={{ fontSize: "0.875rem", color: "#9999AA", textDecoration: "none" }}>
-          Save & exit
+        <Link href="/dashboard" style={{ fontSize: "0.875rem", color: "#9999AA", textDecoration: "none" }}>
+          Save &amp; exit
         </Link>
       </div>
 
       {/* Main content */}
       <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "2rem" }}>
-        <div style={{ width: "100%", maxWidth: 560 }}>
+        <div style={{ width: "100%", maxWidth: 640 }}>
+          {errorMsg && (
+            <div style={{ background: "rgba(232,53,90,0.1)", border: "1px solid rgba(232,53,90,0.3)", borderRadius: 12, padding: "0.875rem 1.25rem", marginBottom: "1.5rem", color: "#E8355A", fontSize: "0.875rem", fontWeight: 500 }}>
+              ⚠️ {errorMsg}
+            </div>
+          )}
 
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} style={{ textAlign: "center", marginBottom: "2.5rem" }}>
-            <p style={{ fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#6361B8", marginBottom: "0.75rem" }}>STEP 1 OF 4</p>
-            <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "clamp(1.75rem, 4vw, 2.25rem)", color: "#100030", letterSpacing: "-0.02em", lineHeight: 1.15, marginBottom: "0.75rem" }}>
-              Upload your resume
-            </h1>
-            <p style={{ fontSize: "0.9375rem", color: "#555570", lineHeight: 1.6 }}>
-              Our AI reads your resume and crafts your first impression in under 60 seconds.
-              <br />Don&apos;t have one? <button style={{ background: "none", border: "none", color: "#6361B8", cursor: "pointer", fontWeight: 600, fontSize: "0.9375rem", padding: 0 }}>Start from scratch →</button>
-            </p>
-          </motion.div>
-
-          {/* Upload dropzone */}
-          <AnimatePresence mode="wait">
-            {uploadState !== "done" ? (
-              <motion.div
-                key="dropzone"
-                initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ delay: 0.15, duration: 0.5 }}
-              >
-                <div
-                  onDragOver={e => { e.preventDefault(); setUploadState("dragging"); }}
-                  onDragLeave={() => { if (uploadState === "dragging") setUploadState("idle"); }}
-                  onDrop={handleDrop}
-                  onClick={() => uploadState === "idle" && fileRef.current?.click()}
-                  style={{
-                    border: `2px dashed ${uploadState === "dragging" ? "#6361B8" : uploadState === "uploading" ? "rgba(99,97,184,0.4)" : "rgba(99,82,138,0.28)"}`,
-                    borderRadius: 20,
-                    background: uploadState === "dragging" ? "rgba(99,97,184,0.06)" : "rgba(255,255,255,0.7)",
-                    backdropFilter: "blur(8px)",
-                    padding: "3rem 2rem",
-                    textAlign: "center",
-                    cursor: uploadState === "idle" ? "pointer" : "default",
-                    transition: "all 200ms",
-                    boxShadow: "0 4px 24px rgba(16,0,48,0.06)",
-                    position: "relative", overflow: "hidden",
-                  }}
-                >
-                  <input ref={fileRef} type="file" accept=".pdf,.doc,.docx,.txt" onChange={handleFile} style={{ display: "none" }} />
-
-                  {uploadState === "idle" || uploadState === "dragging" ? (
-                    <>
-                      <motion.div
-                        animate={uploadState === "dragging" ? { scale: 1.1 } : { scale: 1 }}
-                        style={{ fontSize: "3rem", marginBottom: "1rem" }}
-                      >📄</motion.div>
-                      <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "1.125rem", color: "#100030", marginBottom: "0.5rem" }}>
-                        {uploadState === "dragging" ? "Drop it!" : "Drop your resume here"}
-                      </p>
-                      <p style={{ fontSize: "0.875rem", color: "#777790", marginBottom: "1.25rem" }}>
-                        PDF, Word, or plain text · Max 10MB
-                      </p>
-                      <button style={{
-                        padding: "0.65rem 1.5rem", background: "#100030", color: "white",
-                        borderRadius: 9999, border: "none", fontSize: "0.875rem", fontWeight: 600,
-                        cursor: "pointer", fontFamily: "var(--font-body)",
-                      }}>
-                        Browse files
-                      </button>
-                    </>
-                  ) : (
-                    /* Uploading state */
+          {isGenerating ? (
+             <motion.div key="processing" initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+               style={{ background: "rgba(255,255,255,0.8)", borderRadius: 20, padding: "4rem 2rem", textAlign: "center", boxShadow: "0 8px 32px rgba(16,0,48,0.1)" }}>
+               <div style={{ fontSize: "3rem", marginBottom: "1rem" }}>🤖</div>
+               <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "1.75rem", color: "#100030", marginBottom: "0.75rem" }}>
+                 AI is crafting your master script...
+               </h2>
+               <p style={{ color: "#555570", lineHeight: 1.6, fontSize: "1.05rem" }}>
+                 We are analyzing your resume and answers, setting up the talking photo,<br/>and generating your professional AI video.
+               </p>
+               <Loader2 size={32} className="animate-spin" color="#E8355A" style={{ margin: "2rem auto 0" }} />
+             </motion.div>
+          ) : (
+            <AnimatePresence mode="wait">
+              {currentStep === 1 && (
+                <motion.div key="step1" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
+                  <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "2rem", color: "#100030", marginBottom: "0.5rem" }}>Tell us your goals</h1>
+                  <p style={{ color: "#555570", marginBottom: "2rem" }}>We use these answers to tailor the AI script perfectly to your needs.</p>
+                  
+                  <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
                     <div>
-                      <div style={{ fontSize: "2rem", marginBottom: "1rem" }}>⚙️</div>
-                      <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "1.0625rem", color: "#100030", marginBottom: "0.35rem" }}>
-                        {fileName}
-                      </p>
-                      <p style={{ fontSize: "0.8125rem", color: "#9999AA", marginBottom: "1.5rem" }}>
-                        {progress < 40 ? "Parsing resume..." : progress < 70 ? "Extracting your story..." : progress < 95 ? "Crafting your summary..." : "Almost there..."}
-                      </p>
-                      {/* Progress bar */}
-                      <div style={{ background: "rgba(99,82,138,0.12)", borderRadius: 9999, height: 8, overflow: "hidden", maxWidth: 300, margin: "0 auto" }}>
-                        <motion.div
-                          animate={{ width: `${progress}%` }}
-                          transition={{ duration: 0.4 }}
-                          style={{ height: "100%", background: "linear-gradient(90deg, #6361B8, #E8355A)", borderRadius: 9999 }}
-                        />
-                      </div>
-                      <p style={{ fontSize: "0.75rem", color: "#9999AA", marginTop: "0.75rem" }}>{progress}% complete</p>
+                      <label style={{ display: "flex", alignItems: "center", gap: 6, fontWeight: 600, color: "#100030", marginBottom: "0.5rem" }}><Target size={16}/> What is the main goal of this video?</label>
+                      <input value={answers.goal} onChange={e => setAnswers({...answers, goal: e.target.value})} placeholder="e.g. Find a job in Marketing, Attract investors..."
+                        style={{ width: "100%", padding: "1rem", borderRadius: 12, border: "1.5px solid rgba(99,82,138,0.2)", fontSize: "1rem", outline: "none" }} />
+                    </div>
+                    <div>
+                      <label style={{ display: "flex", alignItems: "center", gap: 6, fontWeight: 600, color: "#100030", marginBottom: "0.5rem" }}><Users size={16}/> Who is your target audience?</label>
+                      <input value={answers.audience} onChange={e => setAnswers({...answers, audience: e.target.value})} placeholder="e.g. Tech Recruiters, Startup Founders..."
+                        style={{ width: "100%", padding: "1rem", borderRadius: 12, border: "1.5px solid rgba(99,82,138,0.2)", fontSize: "1rem", outline: "none" }} />
+                    </div>
+                    <div>
+                      <label style={{ display: "flex", alignItems: "center", gap: 6, fontWeight: 600, color: "#100030", marginBottom: "0.5rem" }}>🎭 What tone do you prefer?</label>
+                      <select value={answers.tone} onChange={e => setAnswers({...answers, tone: e.target.value})}
+                        style={{ width: "100%", padding: "1rem", borderRadius: 12, border: "1.5px solid rgba(99,82,138,0.2)", fontSize: "1rem", outline: "none", background: "white", cursor: "pointer" }}>
+                        <option value="" disabled>Select a tone</option>
+                        <option value="Professional & Formal">Professional & Formal</option>
+                        <option value="Casual & Friendly">Casual & Friendly</option>
+                        <option value="Energetic & Passionate">Energetic & Passionate</option>
+                        <option value="Storyteller & Creative">Storyteller & Creative</option>
+                      </select>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+
+              {currentStep === 2 && (
+                <motion.div key="step2" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
+                  <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "2rem", color: "#100030", marginBottom: "0.5rem" }}>Upload your resume</h1>
+                  <p style={{ color: "#555570", marginBottom: "2rem" }}>We will extract your best achievements and integrate them into the script.</p>
+                  
+                  {showTextInput ? (
+                    <div>
+                      <textarea id="cv-textarea" defaultValue={cvText} placeholder="Paste your CV text here..."
+                        style={{ width: "100%", minHeight: 250, padding: "1rem", borderRadius: 12, border: "1.5px solid rgba(99,82,138,0.3)", fontSize: "0.9rem", resize: "vertical" }} />
+                    </div>
+                  ) : (
+                    <div
+                      onDragOver={e => { e.preventDefault(); setIsCvDragging(true); }}
+                      onDragLeave={() => setIsCvDragging(false)}
+                      onDrop={e => { e.preventDefault(); setIsCvDragging(false); const f = e.dataTransfer.files[0]; if(f) processCvFile(f); }}
+                      onClick={() => !cvFileName && cvFileRef.current?.click()}
+                      style={{
+                        border: `2px dashed ${isCvDragging ? "#6361B8" : "rgba(99,82,138,0.28)"}`,
+                        borderRadius: 20, background: isCvDragging ? "rgba(99,97,184,0.06)" : "rgba(255,255,255,0.7)",
+                        padding: "4rem 2rem", textAlign: "center", cursor: cvFileName ? "default" : "pointer"
+                      }}>
+                      <input ref={cvFileRef} type="file" accept=".pdf,.doc,.docx,.txt" onChange={e => { const f = e.target.files?.[0]; if(f) processCvFile(f); }} style={{ display: "none" }} />
+                      
+                      {cvFileName ? (
+                        <div>
+                          <Briefcase size={40} color="#6361B8" style={{ margin: "0 auto 1rem" }} />
+                          <h3 style={{ fontSize: "1.2rem", margin: "0 0 0.5rem" }}>{cvFileName}</h3>
+                          <p style={{ color: "#34A853", fontWeight: 600 }}>Ready ({cvProgress}%)</p>
+                          <button onClick={() => { setCvFileName(""); setCvText(""); }} style={{ background: "none", border: "none", color: "#E8355A", cursor: "pointer", marginTop: "1rem", fontWeight: 500 }}>Remove file</button>
+                        </div>
+                      ) : (
+                        <>
+                          <UploadCloud size={48} color="#9999AA" style={{ margin: "0 auto 1rem" }} />
+                          <p style={{ fontWeight: 700, fontSize: "1.1rem", marginBottom: "0.5rem" }}>Drop your resume here</p>
+                          <p style={{ color: "#777790", fontSize: "0.85rem", marginBottom: "1.5rem" }}>PDF, Word, or plain text</p>
+                          <button style={{ padding: "0.6rem 1.5rem", background: "#100030", color: "white", borderRadius: 10, border: "none", cursor: "pointer", fontWeight: 600 }}>Browse files</button>
+                          <br/><br/>
+                          <button onClick={(e) => { e.stopPropagation(); setShowTextInput(true); }} style={{ background: "none", border: "none", color: "#6361B8", cursor: "pointer", fontWeight: 600 }}>or paste as text &rarr;</button>
+                        </>
+                      )}
                     </div>
                   )}
-                </div>
+                </motion.div>
+              )}
 
-                {/* Format support */}
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "1.5rem", marginTop: "1.5rem" }}>
-                  {[{ icon: "📄", label: "PDF" }, { icon: "📝", label: "Word (.docx)" }, { icon: "📋", label: "Plain text" }].map(f => (
-                    <div key={f.label} style={{ display: "flex", alignItems: "center", gap: "0.35rem", fontSize: "0.8rem", color: "#9999AA" }}>
-                      <span>{f.icon}</span> {f.label}
-                    </div>
-                  ))}
-                </div>
-              </motion.div>
-            ) : (
-              /* Done state */
-              <motion.div
-                key="done"
-                initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-              >
-                <div style={{
-                  background: "rgba(255,255,255,0.8)", backdropFilter: "blur(12px)",
-                  border: "1.5px solid rgba(99,97,184,0.2)", borderRadius: 20,
-                  padding: "3rem 2rem", textAlign: "center",
-                  boxShadow: "0 8px 32px rgba(16,0,48,0.1)",
-                }}>
-                  <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.1, type: "spring", stiffness: 260, damping: 18 }} style={{ fontSize: "3.5rem", marginBottom: "1rem" }}>✅</motion.div>
-                  <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "1.5rem", color: "#100030", marginBottom: "0.5rem" }}>
-                    Resume parsed!
-                  </h2>
-                  <p style={{ fontSize: "0.9rem", color: "#555570", marginBottom: "0.35rem" }}>{fileName}</p>
-                  <p style={{ fontSize: "0.875rem", color: "#777790", lineHeight: 1.6, marginBottom: "2rem" }}>
-                    Our AI has extracted your career story. Now let&apos;s craft your impression.
-                  </p>
-
-                  {/* AI summary preview */}
-                  <div style={{ background: "rgba(99,97,184,0.06)", border: "1px solid rgba(99,97,184,0.15)", borderRadius: 12, padding: "1.25rem", textAlign: "left", marginBottom: "2rem" }}>
-                    <p style={{ fontSize: "0.72rem", fontWeight: 700, color: "#6361B8", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: "0.6rem" }}>✦ AI SUMMARY PREVIEW</p>
-                    <p style={{ fontSize: "0.875rem", color: "#444466", lineHeight: 1.65 }}>
-                      &ldquo;Results-driven professional with 5+ years building products that scale. Known for turning ambiguous problems into clear, impactful solutions — and making teams better in the process.&rdquo;
-                    </p>
+              {currentStep === 3 && (
+                <motion.div key="step3" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
+                  <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "2rem", color: "#100030", marginBottom: "0.5rem" }}>Upload your photo</h1>
+                  <p style={{ color: "#555570", marginBottom: "2rem" }}>We will animate this photo to speak your personalized script!</p>
+                  
+                  <div
+                    onClick={() => photoFileRef.current?.click()}
+                    style={{
+                      border: "2px dashed rgba(99,82,138,0.28)", borderRadius: 20, background: "rgba(255,255,255,0.7)",
+                      padding: "3rem 2rem", textAlign: "center", cursor: "pointer"
+                    }}>
+                    <input ref={photoFileRef} type="file" accept="image/jpeg, image/png" onChange={e => { const f = e.target.files?.[0]; if(f) processPhotoFile(f); }} style={{ display: "none" }} />
+                    
+                    {photoBase64 ? (
+                      <div>
+                        <div style={{ width: 120, height: 120, borderRadius: "50%", margin: "0 auto 1rem", overflow: "hidden", border: "3px solid #6361B8" }}>
+                          <img src={photoBase64} alt="Preview" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                        </div>
+                        <h3 style={{ fontSize: "1.1rem", margin: "0 0 0.5rem" }}>{photoFileName}</h3>
+                        <p style={{ color: "#34A853", fontWeight: 600 }}>Looks great!</p>
+                        <button onClick={(e) => { e.stopPropagation(); setPhotoBase64(""); setPhotoFileName(""); }} style={{ background: "none", border: "none", color: "#E8355A", cursor: "pointer", marginTop: "1rem", fontWeight: 500 }}>Upload a different photo</button>
+                      </div>
+                    ) : (
+                      <>
+                        <ImageIcon size={48} color="#9999AA" style={{ margin: "0 auto 1rem" }} />
+                        <p style={{ fontWeight: 700, fontSize: "1.1rem", marginBottom: "0.5rem" }}>Click to upload a clear face photo</p>
+                        <p style={{ color: "#777790", fontSize: "0.85rem" }}>Look straight at the camera. JPG or PNG only.</p>
+                      </>
+                    )}
                   </div>
+                </motion.div>
+              )}
 
-                  <Link href="/editor" style={{
-                    display: "inline-flex", alignItems: "center", gap: "0.5rem",
-                    padding: "0.85rem 2.25rem",
-                    background: "#E8355A", color: "white", borderRadius: 9999,
-                    fontSize: "1rem", fontWeight: 600, textDecoration: "none",
-                    fontFamily: "var(--font-body)", boxShadow: "0 4px 20px rgba(232,53,90,0.35)",
-                  }}>
-                    Continue to Editor →
-                  </Link>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+              {currentStep === 4 && (
+                <motion.div key="step4" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
+                  <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "2rem", color: "#100030", marginBottom: "0.5rem" }}>Choose video style</h1>
+                  <p style={{ color: "#555570", marginBottom: "2rem" }}>Select the visual style and background for your video.</p>
+                  
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+                    {["Modern Office", "Minimalist Studio", "Creative Loft", "Solid Gradient"].map((style) => (
+                      <div key={style} onClick={() => setVideoStyle(style)} style={{
+                        border: videoStyle === style ? "2px solid #E8355A" : "2px solid rgba(99,82,138,0.1)",
+                        borderRadius: 16, padding: "1.5rem 1rem", textAlign: "center", cursor: "pointer",
+                        background: videoStyle === style ? "rgba(232,53,90,0.05)" : "white",
+                        transition: "all 0.2s"
+                      }}>
+                        <div style={{ width: 48, height: 48, borderRadius: "50%", background: videoStyle === style ? "#E8355A" : "#F0EEFB", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1rem", color: videoStyle === style ? "white" : "#6361B8" }}>
+                          ✨
+                        </div>
+                        <h4 style={{ margin: 0, fontWeight: 700, color: "#100030" }}>{style}</h4>
+                      </div>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          )}
+
+          {/* Navigation */}
+          {!isGenerating && (
+            <div style={{ display: "flex", justifyContent: "space-between", marginTop: "3rem", borderTop: "1px solid rgba(99,82,138,0.1)", paddingTop: "1.5rem" }}>
+              <button
+                onClick={() => setCurrentStep(s => Math.max(s - 1, 1))}
+                style={{
+                  display: "flex", alignItems: "center", gap: "0.5rem", padding: "0.75rem 1.5rem",
+                  background: "white", border: "1.5px solid rgba(99,82,138,0.2)", borderRadius: 9999,
+                  fontWeight: 600, color: "#100030", cursor: currentStep === 1 ? "not-allowed" : "pointer",
+                  opacity: currentStep === 1 ? 0 : 1, transition: "all 0.2s"
+                }}
+              >
+                <ChevronLeft size={16} /> Back
+              </button>
+
+              <button
+                onClick={currentStep === 4 ? handleGenerate : handleNextStep}
+                style={{
+                  display: "flex", alignItems: "center", gap: "0.5rem", padding: "0.75rem 2rem",
+                  background: "linear-gradient(135deg, #E8355A, #6361B8)", color: "white", borderRadius: 9999,
+                  fontWeight: 600, border: "none", cursor: "pointer", boxShadow: "0 4px 16px rgba(232,53,90,0.3)"
+                }}
+              >
+                {currentStep === 4 ? "Generate Masterpiece ✨" : "Continue"} <ChevronRight size={16} />
+              </button>
+            </div>
+          )}
         </div>
       </div>
 

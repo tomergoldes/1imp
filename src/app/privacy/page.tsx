@@ -21,17 +21,22 @@ export default function PrivacyPage() {
 
             <h2 style={{ fontFamily: "var(--font-display)", fontSize: "1.5rem", color: "#100030", fontWeight: 700, marginTop: "1rem", marginBottom: "0.5rem" }}>1. Information we collect</h2>
             <p>
-              We collect information that you provide directly to us when you create an account, generate a video story, or communicate with us. This may include your name, email address, professional history, and uploaded resume data.
+              We collect information that you provide directly to us when you create an account, upload a CV, or generate a video story. This includes your name, email address, professional history, profile photos, and any other text you submit to our platform.
             </p>
 
-            <h2 style={{ fontFamily: "var(--font-display)", fontSize: "1.5rem", color: "#100030", fontWeight: 700, marginTop: "1rem", marginBottom: "0.5rem" }}>2. How we use your information</h2>
+            <h2 style={{ fontFamily: "var(--font-display)", fontSize: "1.5rem", color: "#100030", fontWeight: 700, marginTop: "1rem", marginBottom: "0.5rem" }}>2. How We Use and Process Your Information</h2>
             <p>
-              We use the information we collect primarily to provide, maintain, and improve our services, including generating your professional video story and matching your profile with relevant recruiter searches.
+              We use your data primarily to provide the 1IMP service—specifically to write a professional script and generate an AI video. To accomplish this, we transmit your text and image data via encrypted API calls to our third-party AI providers (e.g., OpenAI, HeyGen).
             </p>
 
-            <h2 style={{ fontFamily: "var(--font-display)", fontSize: "1.5rem", color: "#100030", fontWeight: 700, marginTop: "1rem", marginBottom: "0.5rem" }}>3. Data security</h2>
+            <h2 style={{ fontFamily: "var(--font-display)", fontSize: "1.5rem", color: "#100030", fontWeight: 700, marginTop: "1rem", marginBottom: "0.5rem" }}>3. Data Sharing and Third Parties</h2>
             <p>
-              We implement industry-standard security measures to protect your personal information. However, no method of transmission over the Internet or electronic storage is 100% secure.
+              We do not sell your personal data. We share data only with trusted service providers essential to delivering the core functionality (AI generation, payment processing via Stripe, and email delivery via Resend). Our AI partners are strictly prohibited from using your personal data to train their foundational models.
+            </p>
+
+            <h2 style={{ fontFamily: "var(--font-display)", fontSize: "1.5rem", color: "#100030", fontWeight: 700, marginTop: "1rem", marginBottom: "0.5rem" }}>4. Data Security & Retention</h2>
+            <p>
+              We implement industry-standard security measures to protect your personal information. You may request the deletion of your account and all associated generated videos at any time by contacting our support team.
             </p>
 
             <h2 style={{ fontFamily: "var(--font-display)", fontSize: "1.5rem", color: "#100030", fontWeight: 700, marginTop: "1rem", marginBottom: "0.5rem" }}>4. Contact Us</h2>

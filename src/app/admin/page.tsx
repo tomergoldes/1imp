@@ -14,8 +14,25 @@ export default async function AdminDashboardPage() {
   });
   const totalViews = analytics._sum.views || 0;
 
-  // Mock revenue data for now until Stripe is integrated
-  const totalRevenue = totalUsers * 19; // Mock: $19 per user average
+  // Financial calculations
+  const EST_COST_PER_VIDEO = 0.40;
+  const totalExpense = totalVideos * EST_COST_PER_VIDEO;
+
+  const payments = await prisma.payment.aggregate({
+    _sum: { amount: true }
+  });
+  
+  const grossIncome = payments._sum.amount || 0;
+  
+  // Calculate Stripe Fees: 2.9% + 30 cents per payment
+  const paymentCount = await prisma.payment.count();
+  const stripeFees = (grossIncome * 0.029) + (paymentCount * 0.30);
+  
+  const netIncome = grossIncome - stripeFees;
+  const netProfit = netIncome - totalExpense;
+
+  // ROI = (Net Profit / Total Expense) * 100
+  const roi = totalExpense > 0 ? ((netProfit / totalExpense) * 100).toFixed(0) : 0;
 
   return (
     <div>
@@ -28,12 +45,18 @@ export default async function AdminDashboardPage() {
         </div>
       </div>
 
-      {/* Metrics Grid */}
+      {/* Main KPI Row */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "1.5rem", marginBottom: "3rem" }}>
-        <MetricCard title="Total Users" value={totalUsers.toLocaleString()} icon={<Users size={20} />} trend="+12%" color="#34A853" />
-        <MetricCard title="Videos Generated" value={totalVideos.toLocaleString()} icon={<Video size={20} />} trend="+24%" color="#E8355A" />
-        <MetricCard title="Total Profile Views" value={totalViews.toLocaleString()} icon={<Eye size={20} />} trend="+18%" color="#6361B8" />
-        <MetricCard title="Total Revenue" value={`$${totalRevenue.toLocaleString()}`} icon={<DollarSign size={20} />} trend="+5%" color="#FABB05" isMock />
+        <MetricCard title="Net Profit" value={`$${netProfit.toFixed(2)}`} icon={<DollarSign size={20} />} trend="Live" color={netProfit >= 0 ? "#34A853" : "#E8355A"} />
+        <MetricCard title="ROI" value={`${roi}%`} icon={<TrendingUp size={20} />} trend="Margin" color="#FABB05" />
+        <MetricCard title="Gross Income" value={`$${grossIncome.toFixed(2)}`} icon={<DollarSign size={20} />} trend={`-${stripeFees.toFixed(2)} Fees`} color="#34A853" />
+        <MetricCard title="Total AI Expense" value={`$${totalExpense.toFixed(2)}`} icon={<Video size={20} />} trend={`${totalVideos} videos`} color="#E8355A" />
+      </div>
+
+      {/* Secondary Metrics */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "1.5rem", marginBottom: "3rem", opacity: 0.8 }}>
+        <MetricCard title="Total Users" value={totalUsers.toLocaleString()} icon={<Users size={20} />} trend="Active" color="#ffffff" />
+        <MetricCard title="Total Profile Views" value={totalViews.toLocaleString()} icon={<Eye size={20} />} trend="Traffic" color="#ffffff" />
       </div>
 
       {/* Main Chart Area */}

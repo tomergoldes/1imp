@@ -16,27 +16,32 @@ export default function TermsPage() {
 
           <div style={{ color: "#555570", lineHeight: 1.7, fontSize: "1.0625rem", display: "flex", flexDirection: "column", gap: "1.5rem" }}>
             <p>
-              Welcome to 1IMP. By accessing or using our website and services, you agree to be bound by these Terms of Service. If you do not agree to all the terms and conditions, you must not use our service.
+              Welcome to 1IMP. These Terms of Service ("Terms") govern your use of the 1IMP website and our AI-powered video generation services. By uploading your CV or using our platform, you agree to these Terms.
             </p>
 
-            <h2 style={{ fontFamily: "var(--font-display)", fontSize: "1.5rem", color: "#100030", fontWeight: 700, marginTop: "1rem", marginBottom: "0.5rem" }}>1. Acceptance of Terms</h2>
+            <h2 style={{ fontFamily: "var(--font-display)", fontSize: "1.5rem", color: "#100030", fontWeight: 700, marginTop: "1rem", marginBottom: "0.5rem" }}>1. Service Overview & Freemium Model</h2>
             <p>
-              By accessing our platform, you agree to be bound by these Terms. If you are using the Services on behalf of an organization, you are agreeing to these Terms for that organization.
+              1IMP provides AI-generated video profiles based on user-provided text or resumes. We offer a free, watermarked preview of your video. To remove the watermark, download the video in HD, or receive a shareable public profile link, you must purchase a Premium Unlock.
             </p>
 
-            <h2 style={{ fontFamily: "var(--font-display)", fontSize: "1.5rem", color: "#100030", fontWeight: 700, marginTop: "1rem", marginBottom: "0.5rem" }}>2. Use of Service</h2>
+            <h2 style={{ fontFamily: "var(--font-display)", fontSize: "1.5rem", color: "#100030", fontWeight: 700, marginTop: "1rem", marginBottom: "0.5rem" }}>2. Purchases and Refunds</h2>
             <p>
-              You must provide accurate information when creating an account or submitting a resume. You are responsible for safeguarding your account and any activities or actions under your account.
+              Due to the significant computational costs associated with AI video generation, all payments for Premium Unlocks are final and non-refundable once the non-watermarked video has been successfully processed and delivered to your account.
             </p>
 
-            <h2 style={{ fontFamily: "var(--font-display)", fontSize: "1.5rem", color: "#100030", fontWeight: 700, marginTop: "1rem", marginBottom: "0.5rem" }}>3. Content Ownership</h2>
+            <h2 style={{ fontFamily: "var(--font-display)", fontSize: "1.5rem", color: "#100030", fontWeight: 700, marginTop: "1rem", marginBottom: "0.5rem" }}>3. User Content and AI Generation</h2>
             <p>
-              You retain all rights to the information and content you provide to 1IMP. By submitting your resume, you grant us a non-exclusive license to process, analyze, and generate your visual story.
+              You retain all ownership rights to the CV or text you upload. By submitting content to 1IMP, you grant us and our third-party AI partners (such as OpenAI and HeyGen) a temporary license to process this data solely for the purpose of generating your video script and avatar. We do not use your personal data to train our own AI models.
             </p>
 
-            <h2 style={{ fontFamily: "var(--font-display)", fontSize: "1.5rem", color: "#100030", fontWeight: 700, marginTop: "1rem", marginBottom: "0.5rem" }}>4. Termination</h2>
+            <h2 style={{ fontFamily: "var(--font-display)", fontSize: "1.5rem", color: "#100030", fontWeight: 700, marginTop: "1rem", marginBottom: "0.5rem" }}>4. Acceptable Use</h2>
             <p>
-              We may terminate or suspend your access to the Service immediately, without prior notice or liability, for any reason whatsoever, including without limitation if you breach the Terms.
+              You agree not to upload any content that is illegal, defamatory, offensive, or infringes on third-party intellectual property. You may not attempt to bypass our paywall, remove watermarks from free previews unlawfully, or scrape our platform.
+            </p>
+
+            <h2 style={{ fontFamily: "var(--font-display)", fontSize: "1.5rem", color: "#100030", fontWeight: 700, marginTop: "1rem", marginBottom: "0.5rem" }}>5. Service Availability</h2>
+            <p>
+              While we strive for 99.9% uptime, AI generation relies on complex third-party APIs. We are not liable for delays in video generation caused by downstream API outages.
             </p>
           </div>
         </div>

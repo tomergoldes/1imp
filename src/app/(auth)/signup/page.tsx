@@ -138,7 +138,9 @@ export default function SignupPage() {
                 </p>
 
                 {/* Google */}
-                <button style={{
+                <button 
+                  onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
+                  style={{
                   width: "100%", display: "flex", alignItems: "center", justifyContent: "center",
                   gap: "0.75rem", padding: "0.8rem 1.5rem",
                   background: "white", border: "1.5px solid rgba(16,0,48,0.15)",

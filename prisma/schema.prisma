@@ -15,18 +15,58 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  isAdmin   Boolean  @default(false)
-  name      String?
-  password  String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  credits   Int      @default(1)
-  profiles  Profile[]
-  videos    Video[]
-  analytics Analytics[]
-  payments  Payment[]
+  id            String    @id @default(cuid())
+  email         String    @unique
+  emailVerified DateTime?
+  isAdmin       Boolean   @default(false)
+  name          String?
+  password      String?
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  credits       Int       @default(1)
+  profiles      Profile[]
+  videos        Video[]
+  analytics     Analytics[]
+  payments      Payment[]
+  accounts      Account[]
+  sessions      Session[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
 }
 
 model Profile {
@@ -39,6 +79,7 @@ model Profile {
   summary     String?
   theme       String   @default("classic")
   isPublic    Boolean  @default(false)
+  isPro       Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -48,11 +89,14 @@ model Profile {
 model Video {
   id          String   @id @default(cuid())
   userId      String
-  videoUrl    String
+  videoUrl    String?
+  heygenId    String?
   style       String   @default("dynamic")
   targetRole  String?
   script      String?
   status      String   @default("PENDING") // PENDING, COMPLETED, FAILED
+  hasWatermark Boolean  @default(true)
+  isDownloadable Boolean @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -80,4 +124,11 @@ model Payment {
   createdAt     DateTime @default(now())
 
   user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model SystemConfig {
+  key         String   @id
+  value       String   @db.Text
+  description String?
+  updatedAt   DateTime @updatedAt
 }
