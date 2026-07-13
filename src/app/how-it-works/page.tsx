@@ -3,54 +3,86 @@ import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
 import Link from "next/link";
 import { FileText, Sparkles, Paintbrush, Video, Link2, BarChart3 } from "lucide-react";
-import Image from "next/image";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
 const steps = [
   {
-    num: "01", icon: <Image src="/3d-icons/icon_document_1783329144880.png" width={56} height={56} alt="Upload" style={{ mixBlendMode: "multiply", transform: "scale(1.2)" }} />,
+    num: "01", Icon: FileText,
     title: "Upload your career story",
     desc: "Drop your resume — PDF, Word, or plain text. Our AI reads every word and extracts the full picture of who you are professionally. Name, title, experience, skills, achievements. All in seconds.",
     detail: "Supports 500+ resume formats. No reformatting required.",
     accent: "#6361B8",
   },
   {
-    num: "02", icon: <Image src="/3d-icons/icon_magic_wand_1783329176369.png" width={56} height={56} alt="AI" style={{ mixBlendMode: "multiply", transform: "scale(1.2)" }} />,
+    num: "02", Icon: Sparkles,
     title: "AI crafts your First Impression",
     desc: "Our AI writes your AI Summary — a 3-4 sentence narrative that captures the real you. Clear, compelling, and recruiter-ready. Not a list of job duties. A story of your impact.",
     detail: "Powered by GPT-4o. Editable. Regeneratable. Yours.",
     accent: "#E8355A",
   },
   {
-    num: "03", icon: <Image src="/3d-icons/icon_palette_1783329152357.png" width={56} height={56} alt="Build" style={{ mixBlendMode: "multiply", transform: "scale(1.2)" }} />,
+    num: "03", Icon: Paintbrush,
     title: "Build your Career Profile",
     desc: "In the split-screen editor, you see exactly what a recruiter will see — in real time. Refine your AI Summary. Add skills. Edit experience bullets. Choose your theme. Every change is instant.",
     detail: "Desktop + mobile preview. 12 premium themes. Autosave.",
     accent: "#6361B8",
   },
   {
-    num: "04", icon: <Image src="/3d-icons/icon_camera_1783329168872.png" width={56} height={56} alt="Record" style={{ mixBlendMode: "multiply", transform: "scale(1.2)" }} />,
+    num: "04", Icon: Video,
     title: "Record your Career Pitch (optional)",
     desc: "Add a 60-second Career Pitch — an AI-coached, teleprompter-guided video that lets your personality land before you even get to the interview. Optional, but powerful.",
     detail: "AI writes the script. You record it once. It works forever.",
     accent: "#E8355A",
   },
   {
-    num: "05", icon: <Image src="/3d-icons/icon_chain_link_1783329003940.png" width={56} height={56} alt="Link" style={{ mixBlendMode: "multiply", transform: "scale(1.2)" }} />,
+    num: "05", Icon: Link2,
     title: "Share your Impression Link",
     desc: "Copy your personal Impression Link — 1imp.io/yourname — and send it everywhere. LinkedIn messages, job applications, email signatures, QR codes. One link. Every platform.",
     detail: "Beautiful Open Graph preview. Instant load. No account required to view.",
     accent: "#6361B8",
   },
   {
-    num: "06", icon: <Image src="/3d-icons/icon_bar_chart_1783329275586.png" width={56} height={56} alt="Analytics" style={{ mixBlendMode: "multiply", transform: "scale(1.2)" }} />,
+    num: "06", Icon: BarChart3,
     title: "Know who's paying attention",
     desc: "Get real-time notifications when a recruiter opens your Career Profile. See which companies are looking. See which sections they spent time on. Turn anxiety into intelligence.",
     detail: "Company identification, time-on-page, section heatmap. (Pro)",
     accent: "#E8355A",
   },
 ];
+
+function StepRow({ step, index, isLast }: { step: (typeof steps)[number]; index: number; isLast: boolean }) {
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, margin: "-60px" });
+  const Icon = step.Icon;
+  return (
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, x: index % 2 === 0 ? -24 : 24 }}
+      animate={inView ? { opacity: 1, x: 0 } : {}}
+      transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
+      style={{ display: "grid", gridTemplateColumns: "80px 1fr", gap: "1.5rem", marginBottom: "3rem", alignItems: "flex-start" }}
+    >
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+        <div style={{
+          width: 80, height: 80, borderRadius: 24,
+          background: "white", border: "1px solid rgba(99,97,184,0.15)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          boxShadow: "0 8px 24px rgba(16,0,48,0.06)", overflow: "hidden"
+        }}>
+          <Icon size={32} color={step.accent} strokeWidth={1.75} />
+        </div>
+        {!isLast && <div style={{ width: 2, height: 48, background: "rgba(99,82,138,0.15)", borderRadius: 1, marginTop: "0.5rem" }} />}
+      </div>
+      <div style={{ background: "white", borderRadius: 16, padding: "1.5rem", border: "1px solid rgba(99,82,138,0.12)", boxShadow: "0 2px 12px rgba(16,0,48,0.05)" }}>
+        <span style={{ fontSize: "0.65rem", fontWeight: 700, color: step.accent, letterSpacing: "0.1em", textTransform: "uppercase" }}>{step.num}</span>
+        <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "1.25rem", color: "#100030", margin: "0.4rem 0 0.75rem", letterSpacing: "-0.01em" }}>{step.title}</h2>
+        <p style={{ fontSize: "0.9375rem", color: "#444466", lineHeight: 1.7, marginBottom: "0.75rem" }}>{step.desc}</p>
+        <p style={{ fontSize: "0.8rem", color: step.accent, fontWeight: 500 }}>→ {step.detail}</p>
+      </div>
+    </motion.div>
+  );
+}
 
 export default function HowItWorksPage() {
   return (
@@ -80,36 +112,9 @@ export default function HowItWorksPage() {
 
       {/* Steps */}
       <section style={{ maxWidth: 800, margin: "0 auto", padding: "5rem 1.5rem" }}>
-        {steps.map((step, i) => {
-          const ref = useRef(null);
-          const inView = useInView(ref, { once: true, margin: "-60px" });
-          return (
-            <motion.div key={i} ref={ref}
-              initial={{ opacity: 0, x: i % 2 === 0 ? -24 : 24 }}
-              animate={inView ? { opacity: 1, x: 0 } : {}}
-              transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
-              style={{ display: "grid", gridTemplateColumns: "80px 1fr", gap: "1.5rem", marginBottom: "3rem", alignItems: "flex-start" }}
-            >
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-                    <div style={{
-                      width: 80, height: 80, borderRadius: 24,
-                      background: "white", border: "1px solid rgba(99,97,184,0.15)",
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                      boxShadow: "0 8px 24px rgba(16,0,48,0.06)", overflow: "hidden"
-                    }}>
-                      {step.icon}
-                    </div>
-                {i < steps.length - 1 && <div style={{ width: 2, height: 48, background: "rgba(99,82,138,0.15)", borderRadius: 1, marginTop: "0.5rem" }} />}
-              </div>
-              <div style={{ background: "white", borderRadius: 16, padding: "1.5rem", border: "1px solid rgba(99,82,138,0.12)", boxShadow: "0 2px 12px rgba(16,0,48,0.05)" }}>
-                <span style={{ fontSize: "0.65rem", fontWeight: 700, color: step.accent, letterSpacing: "0.1em", textTransform: "uppercase" }}>{step.num}</span>
-                <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "1.25rem", color: "#100030", margin: "0.4rem 0 0.75rem", letterSpacing: "-0.01em" }}>{step.title}</h2>
-                <p style={{ fontSize: "0.9375rem", color: "#444466", lineHeight: 1.7, marginBottom: "0.75rem" }}>{step.desc}</p>
-                <p style={{ fontSize: "0.8rem", color: step.accent, fontWeight: 500 }}>→ {step.detail}</p>
-              </div>
-            </motion.div>
-          );
-        })}
+        {steps.map((step, i) => (
+          <StepRow key={step.num} step={step} index={i} isLast={i === steps.length - 1} />
+        ))}
 
         {/* CTA */}
         <div style={{ textAlign: "center", paddingTop: "2rem" }}>

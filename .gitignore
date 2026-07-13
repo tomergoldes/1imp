@@ -32,6 +32,11 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
+
+# local sqlite dev database (schema is Postgres)
+dev.db
+prisma/dev.db
 
 # vercel
 .vercel

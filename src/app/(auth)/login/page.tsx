@@ -25,7 +25,8 @@ export default function LoginPage() {
     });
 
     if (res?.error) {
-      setErrorMsg(res.error);
+      // Generic message to avoid leaking whether an account exists.
+      setErrorMsg("Invalid email or password.");
       setLoading(false);
     } else {
       router.push("/dashboard");
@@ -74,41 +75,20 @@ export default function LoginPage() {
             <span style={{ color: "#E8355A" }}>1IMP</span> is the new standard.&rdquo;
           </motion.p>
 
-          {/* Fake testimonial */}
-          <motion.div
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-            transition={{ delay: 0.6, duration: 0.6 }}
-            style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}
-          >
-            <div style={{
-              width: 40, height: 40, borderRadius: "50%",
-              background: "linear-gradient(135deg, #6361B8, #E8355A)",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              fontFamily: "var(--font-display)", fontWeight: 700, color: "white", fontSize: "0.9rem",
-            }}>S</div>
-            <div>
-              <div style={{ fontWeight: 600, color: "white", fontSize: "0.875rem" }}>Sara Chen</div>
-              <div style={{ color: "rgba(255,255,255,0.45)", fontSize: "0.8rem" }}>Product Manager — got 3× more callbacks</div>
-            </div>
-          </motion.div>
-
-          {/* Stat pills */}
+          {/* Value points */}
           <motion.div
             initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8, duration: 0.5 }}
-            style={{ display: "flex", gap: "0.75rem", marginTop: "2.5rem", flexWrap: "wrap" }}
+            transition={{ delay: 0.6, duration: 0.5 }}
+            style={{ display: "flex", flexDirection: "column", gap: "0.85rem", marginTop: "1rem" }}
           >
             {[
-              { val: "3×", label: "More callbacks" },
-              { val: "-48%", label: "Time to interview" },
-              { val: "50K+", label: "Professionals" },
-            ].map(stat => (
-              <div key={stat.val} style={{
-                background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)",
-                borderRadius: 10, padding: "0.6rem 1rem",
-              }}>
-                <div style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "1.25rem", color: "white", lineHeight: 1 }}>{stat.val}</div>
-                <div style={{ fontSize: "0.72rem", color: "rgba(255,255,255,0.45)", marginTop: 2 }}>{stat.label}</div>
+              "Turn your resume into a video profile in minutes",
+              "Share one link — no account required to view",
+              "Generate for free, pay only to unlock HD",
+            ].map((point) => (
+              <div key={point} style={{ display: "flex", alignItems: "center", gap: "0.65rem" }}>
+                <span style={{ color: "#E8355A", fontWeight: 800 }}>→</span>
+                <span style={{ color: "rgba(255,255,255,0.75)", fontSize: "0.9rem" }}>{point}</span>
               </div>
             ))}
           </motion.div>
@@ -253,11 +233,9 @@ export default function LoginPage() {
             </button>
           </form>
 
-          {/* Trust badges */}
+          {/* Trust note */}
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "1.5rem", marginTop: "2rem" }}>
-            {["🔒 SOC 2", "✓ GDPR", "🛡 No spam"].map(badge => (
-              <span key={badge} style={{ fontSize: "0.75rem", color: "#9999AA" }}>{badge}</span>
-            ))}
+            <span style={{ fontSize: "0.75rem", color: "#9999AA" }}>We never post on your behalf or sell your data.</span>
           </div>
         </motion.div>
       </div>

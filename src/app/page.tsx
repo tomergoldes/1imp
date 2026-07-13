@@ -1,11 +1,10 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { motion, useInView, AnimatePresence, useScroll, useMotionValueEvent, useTransform } from "framer-motion";
-import { CustomArrowRight, CustomChevronLeft, CustomChevronRight, CustomCheck, ThemeIconWrapper } from "@/components/ui/CustomIcons";
-import { Sparkles, Target, Share2, Link2, Search, TrendingDown, FileText, Mail, Video } from "lucide-react";
+import { useState, useRef } from "react";
+import { motion, useInView, AnimatePresence, useScroll, useMotionValueEvent } from "framer-motion";
+import { CustomArrowRight, CustomChevronLeft, CustomChevronRight, CustomCheck } from "@/components/ui/CustomIcons";
+import { FileText, Mail, Video, Link2, Search, TrendingDown, Sparkles, Target, Megaphone } from "lucide-react";
 import Link from "next/link";
-import Image from "next/image";
 
 /* ─── helpers ─────────────────────────────────────────────────────────────── */
 const fv = (delay = 0): any => ({
@@ -18,117 +17,22 @@ import Footer from "@/components/Footer";
 import CinematicHero from "@/components/CinematicHero";
 
 /* ══════════════════════════════════════════════════════════════════════════
-   HERO — exact Voyantis: rounded card, flowers illustration, coral + outline btns
-   ══════════════════════════════════════════════════════════════════════════ */
-function HeroSection() {
-  return (
-    <section style={{ position: "relative", width: "100%", minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-start", paddingTop: "20vh", overflow: "visible", zIndex: 20 }}>
-
-          {/* Background image */}
-          <div style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, zIndex: 1, overflow: "hidden" }}>
-            <Image
-              src="/main.png"
-              alt="Main Hero Background"
-              fill
-              style={{ objectFit: "cover", objectPosition: "bottom center" }}
-              priority
-            />
-          </div>
-
-          {/* Hero text content — sits above the background image */}
-          <div style={{ textAlign: "center", padding: "3.5rem 2rem 2rem", position: "relative", zIndex: 10, maxWidth: 900, width: "100%" }}>
-            <motion.p
-              initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              style={{
-                fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase",
-                color: "#6361B8", marginBottom: "1.1rem", fontFamily: "var(--font-body)",
-              }}
-            >
-              AI VIDEO GENERATOR FOR CAREERS
-            </motion.p>
-
-            <motion.h1
-              initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.08, duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
-              style={{
-                fontFamily: "var(--font-body)", fontWeight: 500,
-                fontSize: "clamp(1.75rem, 3vw, 2.75rem)", lineHeight: 1.15,
-                letterSpacing: "-0.03em", color: "#100030", marginBottom: "1.25rem",
-              }}
-            >
-              Turn your boring PDF resume<br />into a viral video in 60 seconds.
-            </motion.h1>
-
-            <motion.p
-              initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.16, duration: 0.5 }}
-              style={{
-                fontSize: "1rem", color: "#555570", lineHeight: 1.65,
-                fontFamily: "var(--font-body)", maxWidth: 520, margin: "0 auto 1.75rem",
-              }}
-            >
-              Recruiters don't read PDFs, they watch stories. Upload your resume and let our AI generate a stunning Web Story you can send directly to hiring managers.
-            </motion.p>
-
-            <motion.div
-              initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.22, duration: 0.5 }}
-              style={{ display: "flex", gap: "0.75rem", justifyContent: "center", flexWrap: "wrap" }}
-            >
-              {/* Coral primary */}
-              <Link href="/create" style={{
-                display: "inline-flex", alignItems: "center", padding: "0.75rem 1.75rem",
-                background: "#FF3B6B", color: "white", borderRadius: 9999,
-                border: "1.5px solid #100030",
-                fontSize: "1rem", fontWeight: 600, textDecoration: "none",
-                fontFamily: "var(--font-body)", 
-                boxShadow: "inset 0px -3.5px 0px rgba(0,0,0,0.22)",
-                transition: "all 160ms",
-              }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.filter = "brightness(1.05)"; (e.currentTarget as HTMLElement).style.transform = "translateY(-1px)"; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.filter = "brightness(1)"; (e.currentTarget as HTMLElement).style.transform = ""; }}
-              >
-                Generate Your Video
-              </Link>
-
-              {/* Outline secondary */}
-              <Link href="#how-it-works" style={{
-                display: "inline-flex", alignItems: "center", padding: "0.75rem 1.75rem",
-                background: "white", color: "#100030", borderRadius: 9999,
-                border: "1px solid #6361B8", fontSize: "1rem", fontWeight: 500,
-                textDecoration: "none", fontFamily: "var(--font-body)", transition: "all 160ms",
-              }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "#f4f4f8"; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "white"; }}
-              >
-                Watch Demo
-              </Link>
-            </motion.div>
-          </div>
-
-    </section>
-  );
-}
-
-
-/* ══════════════════════════════════════════════════════════════════════════
    CHALLENGE — sticky left headline + 3 scrolling cards on right
    Exact Voyantis "THE CHALLENGE" section
    ══════════════════════════════════════════════════════════════════════════ */
 const challengeCards = [
   {
-    icon: <Image src="/3d-icons/icon_chain_link_1783329003940.png" width={48} height={48} alt="Gap" style={{ mixBlendMode: "multiply", transform: "scale(1.2)" }} />, title: "The Gap",
+    icon: <Link2 size={30} color="#6361B8" strokeWidth={1.75} />, title: "The Gap",
     bold: "Recruiters have a 7-second window to notice each candidate.",
     rest: " But for most professionals, their true value won't be clear in that moment.",
   },
   {
-    icon: <Image src="/3d-icons/icon_magnifying_glass_1783329011658.png" width={48} height={48} alt="Search" style={{ mixBlendMode: "multiply", transform: "scale(1.2)" }} />, title: "The Stand-In",
+    icon: <Search size={30} color="#6361B8" strokeWidth={1.75} />, title: "The Stand-In",
     bold: "So teams fall back on PDFs and keyword matching.",
     rest: " But that only tells hiring teams to find more people who applied, not more people worth hiring.",
   },
   {
-    icon: <Image src="/3d-icons/icon_chart_down_1783329019359.png" width={48} height={48} alt="Result" style={{ mixBlendMode: "multiply", transform: "scale(1.2)" }} />, title: "The Result",
+    icon: <TrendingDown size={30} color="#E8355A" strokeWidth={1.75} />, title: "The Result",
     bold: "Hiring keeps running, but the best candidates quietly get passed over.",
     rest: " By the time someone notices, the damage is months in the making.",
   },
@@ -279,12 +183,6 @@ function HowItWorksSection() {
     else setActive(3);
   });
 
-  // Shuriken movement transforms
-  const shurikenX = useTransform(scrollYProgress, [0, 1], ["-30vw", "30vw"]);
-  const shurikenRotate = useTransform(scrollYProgress, [0, 1], [0, 720]);
-  const shurikenY = useTransform(scrollYProgress, [0, 0.5, 1], [0, -50, 0]); // slight bounce
-
-  // The dark chart card at the top (like Voyantis flow diagram)
   return (
     <section id="how-it-works" ref={ref} style={{ background: "#F4F2FC", padding: "6rem 0", position: "relative", overflow: "visible", zIndex: 25 }}>
       {/* Vector Cloud Divider pointing UP into the previous section */}
@@ -402,7 +300,7 @@ function HowItWorksSection() {
           {[
             {
               icon: (
-                <Image src="/3d-icons/icon_sparkles_1783329034405.png" width={44} height={44} alt="AI" style={{ mixBlendMode: "multiply", transform: "scale(1.3)" }} />
+                <Sparkles size={30} color="#6361B8" strokeWidth={1.75} />
               ),
               subtitle: "AI-POWERED", subtitleColor: "#6361B8",
               title: "Your story, written brilliantly",
@@ -412,7 +310,7 @@ function HowItWorksSection() {
             },
             {
               icon: (
-                <Image src="/3d-icons/icon_target_1783329042315.png" width={44} height={44} alt="Analytics" style={{ mixBlendMode: "multiply", transform: "scale(1.3)" }} />
+                <Target size={30} color="#E8355A" strokeWidth={1.75} />
               ),
               subtitle: "ANALYTICS", subtitleColor: "#E8355A",
               title: "See who's interested, before they call",
@@ -422,7 +320,7 @@ function HowItWorksSection() {
             },
             {
               icon: (
-                <Image src="/3d-icons/icon_megaphone_1783329051654.png" width={44} height={44} alt="Share" style={{ mixBlendMode: "multiply", transform: "scale(1.3)" }} />
+                <Megaphone size={30} color="#100030" strokeWidth={1.75} />
               ),
               subtitle: "SHARE ANYWHERE", subtitleColor: "#100030",
               title: "One link. Every platform. Instant wow.",
@@ -1005,19 +903,19 @@ function SuccessStoriesSection() {
 
                     {/* CTA button */}
                     <div style={{ marginTop: "auto", display: "flex", justifyContent: "flex-end" }}>
-                      <button style={{
+                      <Link href="/how-it-works" style={{
                         display: "inline-flex", alignItems: "center", gap: "0.4rem",
                         padding: "0.6rem 1.2rem",
                         background: "#100030", color: "white",
                         borderRadius: 9999, border: "none", cursor: "pointer",
-                        fontSize: "0.85rem", fontWeight: 700,
+                        fontSize: "0.85rem", fontWeight: 700, textDecoration: "none",
                         transition: "transform 140ms",
                       }}
                         onMouseEnter={e => (e.currentTarget.style.transform = "translateX(3px)")}
                         onMouseLeave={e => (e.currentTarget.style.transform = "translateX(0)")}
                       >
-                        Case Study <CustomArrowRight size={13} />
-                      </button>
+                        See how it works <CustomArrowRight size={13} />
+                      </Link>
                     </div>
                   </div>
                 </motion.div>
@@ -1334,191 +1232,38 @@ function CTASection() {
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
-   FEATURE SHOWCASE — 3-card grid: AI Summary, Analytics, Share
-   ══════════════════════════════════════════════════════════════════════════ */
-const features = [
-  {
-    icon: "✦",
-    tag: "AI-POWERED",
-    title: "Your story, written brilliantly",
-    desc: "Drop your resume and watch our AI craft a professional summary that sounds exactly like you — only sharper. Every bullet rewritten for impact. Every skill surfaced for relevance.",
-    accent: "#6361B8",
-    bg: "linear-gradient(135deg, #F0EEFB 0%, #E4E0F4 100%)",
-    highlights: ["Professional summary in seconds", "Achievement bullets rewritten for impact", "Skills automatically ranked by relevance"],
-  },
-  {
-    icon: "◎",
-    tag: "ANALYTICS",
-    title: "See who's interested, before they call",
-    desc: "Get real-time notifications when someone views your impression. Know which companies are looking, how long they spent, and which sections grabbed their attention.",
-    accent: "#E8355A",
-    bg: "linear-gradient(135deg, #FEF0F3 0%, #FDDCE3 100%)",
-    highlights: ["Real-time view notifications", "Company identification (Pro)", "Section engagement heatmap"],
-  },
-  {
-    icon: "⌁",
-    tag: "SHARE ANYWHERE",
-    title: "One link. Every platform. Instant wow.",
-    desc: "Your personalized 1IMP link works everywhere — LinkedIn messages, email signatures, job applications, QR codes. Beautiful Open Graph previews make every share count.",
-    accent: "#100030",
-    bg: "linear-gradient(135deg, #ECEEF8 0%, #E0E4F4 100%)",
-    highlights: ["Custom yourname.1imp.io URL", "Beautiful Open Graph previews", "QR code + one-click copy"],
-  },
-];
-
-function FeatureShowcaseSection() {
-  const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-80px" });
-
-  return (
-    <section ref={ref} style={{ background: "#F4F2FC", padding: "6rem 0", position: "relative", overflow: "visible", zIndex: 25 }}>
-      {/* Vector Cloud Divider pointing DOWN from the previous section */}
-      <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "50px", zIndex: 10, width: "100%", overflow: "hidden", transform: "rotate(180deg)" }}>
-        <svg viewBox="0 0 1440 50" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" style={{ width: "100%", height: "100%", display: "block" }}>
-          
-          {/* Layer 1: Darkest accent (shadow/back) */}
-          <path fill="#E4E0F4" d="
-            M0,50 L0,35
-            C30,20 60,15 90,25
-            C120,5 170,0 220,15
-            C260,0 320,-5 380,10
-            C420,-10 490,-5 550,15
-            C590,0 660,-5 720,10
-            C760,-5 820,0 880,15
-            C920,0 980,-10 1040,5
-            C1080,-5 1140,-5 1200,10
-            C1250,-5 1310,0 1370,15
-            C1400,5 1420,15 1440,25
-            L1440,50 Z
-          " transform="translate(-10, -5)" />
-
-          {/* Layer 2: Mid-tone (middle) */}
-          <path fill="#EBE9F6" d="
-            M0,50 L0,35
-            C30,20 60,15 90,25
-            C120,5 170,0 220,15
-            C260,0 320,-5 380,10
-            C420,-10 490,-5 550,15
-            C590,0 660,-5 720,10
-            C760,-5 820,0 880,15
-            C920,0 980,-10 1040,5
-            C1080,-5 1140,-5 1200,10
-            C1250,-5 1310,0 1370,15
-            C1400,5 1420,15 1440,25
-            L1440,50 Z
-          " transform="translate(10, -2)" />
-
-          {/* Layer 3: Foreground (Matches #FDFDFD SuccessStoriesSection background) */}
-          <path fill="#FDFDFD" d="
-            M0,50 L0,35
-            C30,20 60,15 90,25
-            C120,5 170,0 220,15
-            C260,0 320,-5 380,10
-            C420,-10 490,-5 550,15
-            C590,0 660,-5 720,10
-            C760,-5 820,0 880,15
-            C920,0 980,-10 1040,5
-            C1080,-5 1140,-5 1200,10
-            C1250,-5 1310,0 1370,15
-            C1400,5 1420,15 1440,25
-            L1440,50 Z
-          " />
-        </svg>
-      </div>
-      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 1.5rem" }}>
-        <motion.div {...fv(0)} animate={inView ? "visible" : "hidden"} style={{ textAlign: "center", marginBottom: "3.5rem" }}>
-          <p style={{ fontSize: "0.72rem", fontWeight: 700, color: "#6361B8", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "0.75rem" }}>THE PLATFORM</p>
-          <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "clamp(1.75rem, 3vw, 2.75rem)", color: "#100030", letterSpacing: "-0.02em", lineHeight: 1.15, maxWidth: 560, margin: "0 auto" }}>
-            Everything you need to get noticed
-          </h2>
-        </motion.div>
-
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "1.25rem" }} className="features-grid">
-          {features.map((feat, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 28 }} animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ delay: i * 0.12 + 0.1, duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
-              style={{ borderRadius: 20, overflow: "hidden", border: "1px solid rgba(99,82,138,0.15)", boxShadow: "0 4px 24px rgba(16,0,48,0.07)", background: "white" }}
-            >
-              {/* Top colored area */}
-              <div style={{ background: feat.bg, padding: "2rem 2rem 1.5rem" }}>
-                <div style={{ width: 48, height: 48, borderRadius: 14, background: "white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.5rem", marginBottom: "1rem", boxShadow: "0 2px 12px rgba(16,0,48,0.1)" }}>
-                  {feat.icon}
-                </div>
-                <p style={{ fontSize: "0.68rem", fontWeight: 700, color: feat.accent, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "0.5rem" }}>{feat.tag}</p>
-                <h3 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "1.125rem", color: "#100030", lineHeight: 1.3, marginBottom: "0.875rem" }}>{feat.title}</h3>
-                <p style={{ fontSize: "0.875rem", color: "#555570", lineHeight: 1.65 }}>{feat.desc}</p>
-              </div>
-
-              {/* Highlights */}
-              <div style={{ padding: "1.25rem 2rem 1.75rem", borderTop: "1px solid rgba(99,82,138,0.12)" }}>
-                {feat.highlights.map((h, j) => (
-                  <div key={j} style={{ display: "flex", alignItems: "center", gap: "0.6rem", marginBottom: "0.6rem" }}>
-                    <div style={{ width: 18, height: 18, borderRadius: "50%", background: feat.accent, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                      <span style={{ color: "white", fontSize: "0.6rem", fontWeight: 900 }}>✓</span>
-                    </div>
-                    <span style={{ fontSize: "0.875rem", color: "#444466" }}>{h}</span>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-      <style>{`@media(max-width:900px){ .features-grid{ grid-template-columns:1fr!important; } }`}</style>
-    </section>
-  );
-}
-
-/* ══════════════════════════════════════════════════════════════════════════
    PRICING — Free vs Pro vs Career Pack
    ══════════════════════════════════════════════════════════════════════════ */
 const plans = [
   {
-    name: "Basic",
+    name: "Preview",
     price: "$0",
     period: "",
-    desc: "Perfect for your current job search.",
-    cta: "Generate Video",
+    desc: "Generate your video and see the magic before committing.",
+    cta: "Try it for Free",
     ctaHref: "/create",
     dark: false,
     features: [
-      "1 AI Video Story",
-      "Basic Video Themes",
-      "Standard Video Rendering",
-      "Shareable Web Link",
+      "AI script generation",
+      "AI video generation",
+      "Watermarked preview",
+      "Hosted on 1IMP",
     ],
   },
   {
-    name: "Pro",
-    price: "$12",
-    period: "/mo",
-    desc: "For ambitious candidates actively interviewing.",
-    cta: "Upgrade to Pro",
+    name: "Full Access",
+    price: "$9.99",
+    period: "/ video",
+    desc: "Unlock your video and share it everywhere.",
+    cta: "Create Now",
     ctaHref: "/create",
     dark: true,
-    badge: "MOST POPULAR",
+    badge: "PREMIUM UNLOCK",
     features: [
-      "Unlimited AI Generation",
-      "Premium Video Themes",
-      "View Analytics & Tracking",
-      "Remove 1IMP Branding",
-    ],
-  },
-  {
-    name: "Career Pack",
-    price: "$39",
-    period: "once",
-    desc: "A one-time boost for multiple applications.",
-    cta: "Get Career Pack",
-    ctaHref: "/create",
-    dark: false,
-    features: [
-      "3 Custom Video Stories",
-      "AI Cover Letter Generator",
-      "LinkedIn Profile Audit",
-      "Lifetime access to your stories",
+      "No 1IMP watermark",
+      "HD 1080p download (MP4)",
+      "Shareable public profile",
+      "Commercial rights",
     ],
   },
 ];
@@ -1539,7 +1284,7 @@ function PricingSection() {
           </p>
         </motion.div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "1.5rem", alignItems: "stretch" }} className="pricing-grid">
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "1.5rem", alignItems: "stretch", maxWidth: 760, margin: "0 auto" }} className="pricing-grid">
           {plans.map((plan, i) => (
             <motion.div
               key={i}

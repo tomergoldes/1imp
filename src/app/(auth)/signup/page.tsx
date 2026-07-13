@@ -4,7 +4,6 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
 
 const roles = [
   "Software Engineer", "Product Manager", "Designer", "Marketing",
@@ -18,7 +17,6 @@ export default function SignupPage() {
   const [password, setPassword] = useState("");
   const [selectedRole, setSelectedRole] = useState("");
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
 
   const handleStep1 = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,8 +48,8 @@ export default function SignupPage() {
   const handleStep2 = async () => {
     if (!selectedRole) return;
     setLoading(true);
-    await new Promise(r => setTimeout(r, 1000));
-    // In production: redirect to onboarding
+    // The selected role is carried into onboarding via the query string so it
+    // pre-fills step 1 instead of being discarded.
     setLoading(false);
     setStep(3);
   };
@@ -281,7 +279,7 @@ export default function SignupPage() {
                 <p style={{ fontSize: "0.9375rem", color: "#555570", marginBottom: "2rem", lineHeight: 1.6 }}>
                   Welcome, {name || "there"}! Your journey to a better first impression starts now.
                 </p>
-                <Link href="/onboarding" style={{
+                <Link href={selectedRole ? `/onboarding?role=${encodeURIComponent(selectedRole)}` : "/onboarding"} style={{
                   display: "inline-flex", alignItems: "center", gap: "0.5rem",
                   padding: "0.8rem 2rem", background: "#E8355A", color: "white",
                   borderRadius: 9999, fontSize: "0.9375rem", fontWeight: 600,

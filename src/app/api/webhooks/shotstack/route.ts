@@ -2,24 +2,42 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sendVideoReadyEmail } from "@/lib/email-service";
 
+/**
+ * Constant-time-ish comparison to avoid trivial token length/short-circuit leaks.
+ */
+function tokensMatch(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let result = 0;
+  for (let i = 0; i < a.length; i++) {
+    result |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return result === 0;
+}
+
 export async function POST(req: Request) {
   try {
+    // Authenticate the webhook via the shared secret token in the callback URL.
+    const expectedToken = process.env.SHOTSTACK_WEBHOOK_SECRET;
+    if (!expectedToken) {
+      console.error("[Shotstack Webhook] SHOTSTACK_WEBHOOK_SECRET is not configured; rejecting.");
+      return NextResponse.json({ error: "Webhook not configured" }, { status: 500 });
+    }
+
+    const providedToken = new URL(req.url).searchParams.get("token") || "";
+    if (!tokensMatch(providedToken, expectedToken)) {
+      console.warn("[Shotstack Webhook] Rejected webhook with invalid token.");
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const body = await req.json();
-
-    // Shotstack sends standard webhook payloads.
-    // Example: { id: "abcd-1234", status: "done", url: "https://...", error: null }
-    // However, our callback URL doesn't inherently know WHICH videoProjectId this belongs to
-    // unless we look it up by the renderJobId in our database.
-
     const { id: renderJobId, status, url, error } = body;
 
     if (!renderJobId) {
       return NextResponse.json({ error: "Invalid webhook payload" }, { status: 400 });
     }
 
-    // Find the corresponding VideoProject
     const project = await prisma.videoProject.findFirst({
-      where: { renderJobId }
+      where: { renderJobId },
     });
 
     if (!project) {
@@ -27,45 +45,66 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: true }); // Return 200 so they stop retrying
     }
 
+    // Idempotency: only act while the project is still RENDERING. Repeated webhook
+    // deliveries (Shotstack retries) will no-op once we've transitioned state.
+    if (project.status !== "RENDERING") {
+      console.log(
+        `[Shotstack Webhook] Project ${project.id} already in state ${project.status}; ignoring duplicate.`
+      );
+      return NextResponse.json({ success: true });
+    }
+
     if (status === "done") {
-      const updatedProject = await prisma.videoProject.update({
-        where: { id: project.id },
-        data: {
-          status: "COMPLETED",
-          videoUrl: url
-        },
-        include: { user: true }
+      // Guard the transition atomically: updateMany with the RENDERING precondition
+      // ensures only one concurrent webhook wins the completion.
+      const transition = await prisma.videoProject.updateMany({
+        where: { id: project.id, status: "RENDERING" },
+        data: { status: "COMPLETED", videoUrl: url },
       });
+
+      if (transition.count === 0) {
+        return NextResponse.json({ success: true });
+      }
+
+      const updatedProject = await prisma.videoProject.findUnique({
+        where: { id: project.id },
+        include: { user: true },
+      });
+
       console.log(`[Shotstack Webhook] Project ${project.id} completed successfully.`);
-      
-      // Send email notification
-      if (updatedProject.user?.email) {
-        const videoLink = `${process.env.NEXT_PUBLIC_APP_URL || 'https://1imp.com'}/dashboard`;
-        await sendVideoReadyEmail(updatedProject.user.email, updatedProject.user.name || "Candidate", videoLink);
+
+      if (updatedProject?.user?.email) {
+        const videoLink = `${process.env.NEXT_PUBLIC_APP_URL || "https://1imp.com"}/dashboard`;
+        await sendVideoReadyEmail(
+          updatedProject.user.email,
+          updatedProject.user.name || "Candidate",
+          videoLink
+        );
       }
-      
     } else if (status === "failed") {
-      const updatedProject = await prisma.videoProject.update({
-        where: { id: project.id },
-        data: {
-          status: "ERROR"
-        },
-        include: { user: true }
+      // Atomically transition RENDERING -> ERROR. Only the winning update refunds,
+      // so repeated "failed" deliveries cannot mint unlimited credits.
+      const transition = await prisma.videoProject.updateMany({
+        where: { id: project.id, status: "RENDERING" },
+        data: { status: "ERROR" },
       });
-      console.error(`[Shotstack Webhook] Project ${project.id} failed to render. Error: ${error}`);
-      
-      // Auto-refund credit if they paid for it (assuming 1 credit per render)
-      if (updatedProject.user) {
-        await prisma.user.update({
-          where: { id: updatedProject.userId },
-          data: { credits: { increment: 1 } }
-        });
-        console.log(`[Shotstack Webhook] Refunded 1 credit to user ${updatedProject.userId} due to render failure.`);
+
+      if (transition.count === 0) {
+        return NextResponse.json({ success: true });
       }
-      
-    } else {
-      // Still rendering or queued, usually webhooks are only sent on completion/failure
-      // but if we receive an intermediate state, just ignore it.
+
+      console.error(
+        `[Shotstack Webhook] Project ${project.id} failed to render. Error: ${error}`
+      );
+
+      // Refund the single credit consumed for this render.
+      await prisma.user.update({
+        where: { id: project.userId },
+        data: { credits: { increment: 1 } },
+      });
+      console.log(
+        `[Shotstack Webhook] Refunded 1 credit to user ${project.userId} due to render failure.`
+      );
     }
 
     return NextResponse.json({ success: true });

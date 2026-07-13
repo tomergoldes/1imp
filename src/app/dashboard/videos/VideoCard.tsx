@@ -10,8 +10,17 @@ import { useState } from "react";
 export function VideoCard({ video }: { video: VideoModel }) {
   const router = useRouter();
   const [isDeleting, setIsDeleting] = useState(false);
-  const isPending = video.status === "PENDING";
-  const isFailed = video.status === "FAILED";
+  // VideoProject statuses: DRAFT, SCRIPT_READY, APPROVED, RENDERING, COMPLETED, ERROR
+  const isCompleted = video.status === "COMPLETED";
+  const isFailed = video.status === "ERROR";
+  const isPending = !isCompleted && !isFailed; // in-progress / not yet playable
+  const statusLabel = isCompleted
+    ? "Ready"
+    : isFailed
+      ? "Failed"
+      : video.status === "RENDERING"
+        ? "Rendering"
+        : "Draft";
   
   const handleDelete = async () => {
     if (!confirm("Are you sure you want to delete this video?")) return;
@@ -86,7 +95,7 @@ export function VideoCard({ video }: { video: VideoModel }) {
             background: isPending ? "rgba(255,255,255,0.2)" : isFailed ? "#E8355A" : "#34A853",
             color: "white", backdropFilter: "blur(4px)", boxShadow: "0 2px 8px rgba(0,0,0,0.1)"
           }}>
-            {video.status}
+            {statusLabel}
           </div>
         </div>
       </div>

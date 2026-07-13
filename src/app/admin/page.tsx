@@ -6,7 +6,7 @@ import { RevenueChart } from "./components/RevenueChart";
 export default async function AdminDashboardPage() {
   // Fetch real data for users and videos
   const totalUsers = await prisma.user.count();
-  const totalVideos = await prisma.video.count();
+  const totalVideos = await prisma.videoProject.count();
 
   // Aggregate total views from all analytics
   const analytics = await prisma.analytics.aggregate({
@@ -14,9 +14,11 @@ export default async function AdminDashboardPage() {
   });
   const totalViews = analytics._sum.views || 0;
 
-  // Financial calculations
+  // Financial calculations — prefer tracked render cost, fall back to an estimate.
   const EST_COST_PER_VIDEO = 0.40;
-  const totalExpense = totalVideos * EST_COST_PER_VIDEO;
+  const renderCostAgg = await prisma.videoProject.aggregate({ _sum: { renderCost: true } });
+  const trackedCost = renderCostAgg._sum.renderCost || 0;
+  const totalExpense = trackedCost > 0 ? trackedCost : totalVideos * EST_COST_PER_VIDEO;
 
   const payments = await prisma.payment.aggregate({
     _sum: { amount: true }

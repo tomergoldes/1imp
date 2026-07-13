@@ -17,6 +17,7 @@ export async function GET() {
 
     return NextResponse.json({ credits: user?.credits || 0 });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error("[Credits API] Error:", error);
+    return NextResponse.json({ error: "Failed to fetch credits" }, { status: 500 });
   }
 }

@@ -19,6 +19,24 @@ export default function CinematicHero() {
     offset: ["start start", "end end"]
   });
 
+  // Draw frame to canvas (declared before the effect that references it).
+  const renderFrame = (index: number) => {
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext("2d");
+    if (!canvas || !ctx) return;
+
+    const img = imagesRef.current[index];
+    if (!img) return; // Not loaded yet
+
+    if (canvas.width !== img.width || canvas.height !== img.height) {
+      canvas.width = img.width;
+      canvas.height = img.height;
+    }
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, 0, 0);
+  };
+
   // Preload images
   useEffect(() => {
     let loadedCount = 0;
@@ -56,26 +74,8 @@ export default function CinematicHero() {
     };
 
     preloadSequence();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  // Draw frame to canvas
-  const renderFrame = (index: number) => {
-    const canvas = canvasRef.current;
-    const ctx = canvas?.getContext("2d");
-    if (!canvas || !ctx) return;
-
-    const img = imagesRef.current[index];
-    if (!img) return; // Not loaded yet
-
-    // Set canvas dimensions to match image resolution for crispness
-    if (canvas.width !== img.width || canvas.height !== img.height) {
-      canvas.width = img.width;
-      canvas.height = img.height;
-    }
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.drawImage(img, 0, 0);
-  };
 
   // Sync scroll to frame
   useMotionValueEvent(scrollYProgress, "change", (latest) => {
@@ -92,7 +92,14 @@ export default function CinematicHero() {
     <section ref={containerRef} style={{ position: "relative", height: "400vh" }}>
       {/* Pinned sticky container */}
       <div style={{ position: "sticky", top: 0, left: 0, width: "100%", height: "100vh", overflow: "hidden" }}>
-        
+
+        {/* Fallback background — shown behind the canvas so the hero is never
+            blank if the frame sequence fails to load. */}
+        <div style={{
+          position: "absolute", inset: 0, zIndex: 0,
+          background: "linear-gradient(135deg, #F0EEFB 0%, #E4E0F4 55%, #DDD8F0 100%)",
+        }} />
+
         {/* The high-performance canvas */}
         <canvas
           ref={canvasRef}
@@ -179,7 +186,7 @@ export default function CinematicHero() {
                 onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "#f4f4f8"; }}
                 onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "white"; }}
               >
-                Watch Demo
+                See How It Works
               </Link>
             </div>
           </motion.div>

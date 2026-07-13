@@ -10,7 +10,7 @@ type UserData = {
   email: string;
   isAdmin: boolean;
   createdAt: Date;
-  _count: { videos: number };
+  _count: { videoProjects: number };
 };
 
 export function UsersTable({ initialUsers }: { initialUsers: UserData[] }) {
@@ -118,7 +118,7 @@ export function UsersTable({ initialUsers }: { initialUsers: UserData[] }) {
                   </span>
                 </td>
                 <td style={{ padding: "1rem 1.5rem", color: "white" }}>
-                  {user._count.videos}
+                  {user._count.videoProjects}
                 </td>
                 <td style={{ padding: "1rem 1.5rem", color: "rgba(255,255,255,0.6)", fontSize: "0.875rem" }}>
                   {new Date(user.createdAt).toLocaleDateString()}

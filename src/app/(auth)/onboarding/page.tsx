@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ChevronRight, ChevronLeft } from "lucide-react";
@@ -20,9 +20,13 @@ export default function OnboardingPage() {
   const [currentStep, setCurrentStep] = useState(1);
   const [errorMsg, setErrorMsg] = useState("");
   
-  // Data state
-  const [data, setData] = useState({
-    targetRole: "",
+  // Data state. The target role is read from the ?role= query param (passed from
+  // signup) via a lazy initializer so we never call setState inside an effect.
+  const [data, setData] = useState(() => ({
+    targetRole:
+      typeof window !== "undefined"
+        ? new URLSearchParams(window.location.search).get("role") || ""
+        : "",
     targetIndustry: "",
     jobDescription: "",
     cvText: "",
@@ -34,7 +38,7 @@ export default function OnboardingPage() {
     photoFileName: "",
     ninjaColor: "#1A1A1A",
     ninjaGender: "neutral",
-  });
+  }));
 
   const [showTextInput, setShowTextInput] = useState(false);
   const [isGeneratingStory, setIsGeneratingStory] = useState(false);
@@ -51,17 +55,19 @@ export default function OnboardingPage() {
   const [renderStatus, setRenderStatus] = useState<"rendering" | "completed" | "error">("rendering");
   const [finalVideoUrl, setFinalVideoUrl] = useState<string | null>(null);
 
+  // Track poll interval and redirect timer so they can be cleared on unmount.
+  const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const redirectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
+      if (redirectTimerRef.current) clearTimeout(redirectTimerRef.current);
+    };
+  }, []);
+
   const updateData = (newData: Partial<typeof data>) => {
     setData(prev => ({ ...prev, ...newData }));
-  };
-
-  const readFileAsText = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = (e) => resolve(e.target?.result as string || "");
-      reader.onerror = () => reject(new Error("Failed to read file"));
-      reader.readAsText(file);
-    });
   };
 
   const readFileAsDataURL = (file: File): Promise<string> => {
@@ -199,7 +205,7 @@ export default function OnboardingPage() {
         });
         const checkoutJson = await checkoutRes.json();
         if (checkoutJson.url) {
-          window.location.href = checkoutJson.url;
+          window.location.assign(checkoutJson.url);
           return;
         }
         throw new Error("Failed to initialize checkout");
@@ -216,22 +222,25 @@ export default function OnboardingPage() {
   };
   
   const pollRenderStatus = (projectId: string) => {
-    const interval = setInterval(async () => {
+    // Clear any previous poller before starting a new one.
+    if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
+
+    pollIntervalRef.current = setInterval(async () => {
       try {
         const res = await fetch(`/api/pipeline/status/${projectId}`);
         const statusData = await res.json();
-        
+
         if (statusData.status === "COMPLETED" && statusData.videoUrl) {
-          clearInterval(interval);
+          if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
           setRenderStatus("completed");
           setFinalVideoUrl(statusData.videoUrl);
-          
-          // Optionally redirect after a few seconds
-          setTimeout(() => {
-             router.push(`/v/${projectId}`);
+
+          // Redirect after a few seconds (cleared on unmount).
+          redirectTimerRef.current = setTimeout(() => {
+            router.push(`/v/${projectId}`);
           }, 3000);
         } else if (statusData.status === "ERROR" || statusData.status === "FAILED") {
-          clearInterval(interval);
+          if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
           setRenderStatus("error");
         }
       } catch (err) {
@@ -276,7 +285,7 @@ export default function OnboardingPage() {
           ))}
         </div>
         <Link href="/dashboard" style={{ fontSize: "0.875rem", color: "#9999AA", textDecoration: "none" }}>
-          Save & exit
+          Exit
         </Link>
       </div>
 

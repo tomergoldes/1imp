@@ -1,25 +1,91 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { User, Link as LinkIcon, Shield, CreditCard, Check, AlertCircle, ArrowRight } from "lucide-react";
+import { User, Link as LinkIcon, Shield, CreditCard, Check, AlertCircle, ArrowRight, Loader2 } from "lucide-react";
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState("general");
-  
-  // Mocks
-  const [slug, setSlug] = useState("tomer");
-  const [slugStatus, setSlugStatus] = useState<"available" | "taken" | "checking">("available");
+
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [slug, setSlug] = useState("");
+  const [hasProfile, setHasProfile] = useState(false);
+  const [slugStatus, setSlugStatus] = useState<"available" | "taken" | "checking" | "invalid" | "idle">("idle");
   const [searchVisible, setSearchVisible] = useState(true);
   const [talentPool, setTalentPool] = useState(true);
+  const [savingName, setSavingName] = useState(false);
+  const [savingSlug, setSavingSlug] = useState(false);
+  const [toast, setToast] = useState("");
+  const slugTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    fetch("/api/user/profile")
+      .then((r) => r.json())
+      .then((data) => {
+        setName(data.name || "");
+        setEmail(data.email || "");
+        setSlug(data.slug || "");
+        setHasProfile(Boolean(data.slug) || data.isPublic !== undefined);
+      })
+      .catch(() => {});
+    return () => {
+      if (slugTimer.current) clearTimeout(slugTimer.current);
+    };
+  }, []);
+
+  const showToast = (msg: string) => {
+    setToast(msg);
+    setTimeout(() => setToast(""), 3000);
+  };
 
   const handleSlugChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "");
     setSlug(val);
     setSlugStatus("checking");
-    setTimeout(() => {
-      setSlugStatus(val === "tomer" || val === "admin" ? "taken" : "available");
+    if (slugTimer.current) clearTimeout(slugTimer.current);
+    slugTimer.current = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/user/slug-check?slug=${encodeURIComponent(val)}`);
+        const data = await res.json();
+        setSlugStatus(data.status);
+      } catch {
+        setSlugStatus("invalid");
+      }
     }, 400);
+  };
+
+  const saveName = async () => {
+    setSavingName(true);
+    try {
+      const res = await fetch("/api/user/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name }),
+      });
+      showToast(res.ok ? "Saved successfully!" : "Failed to save.");
+    } catch {
+      showToast("Failed to save.");
+    } finally {
+      setSavingName(false);
+    }
+  };
+
+  const saveSlug = async () => {
+    setSavingSlug(true);
+    try {
+      const res = await fetch("/api/user/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ slug }),
+      });
+      const data = await res.json();
+      showToast(res.ok ? "URL updated!" : data.error || "Failed to update URL.");
+    } catch {
+      showToast("Failed to update URL.");
+    } finally {
+      setSavingSlug(false);
+    }
   };
 
   const tabs = [
@@ -30,6 +96,11 @@ export default function SettingsPage() {
 
   return (
     <div>
+      {toast && (
+        <div style={{ position: "fixed", top: 24, right: 24, zIndex: 300, background: "#100030", color: "white", padding: "0.75rem 1.25rem", borderRadius: 10, fontSize: "0.9rem", fontWeight: 600, boxShadow: "0 8px 24px rgba(16,0,48,0.2)" }}>
+          {toast}
+        </div>
+      )}
       <div style={{ marginBottom: "2rem" }}>
         <h1 style={{ fontSize: "1.75rem", fontWeight: 700, fontFamily: "var(--font-display)", letterSpacing: "-0.02em", color: "#100030", marginBottom: "0.25rem" }}>
           Settings
@@ -68,14 +139,14 @@ export default function SettingsPage() {
                 <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
                   <div>
                     <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 600, color: "#555570", marginBottom: "0.4rem" }}>Full Name</label>
-                    <input type="text" defaultValue="Tomer Goldes" style={{ width: "100%", padding: "0.75rem 1rem", border: "1px solid rgba(16,0,48,0.1)", borderRadius: 8, fontSize: "0.95rem", color: "#100030", outline: "none" }} />
+                    <input type="text" value={name} onChange={(e) => setName(e.target.value)} style={{ width: "100%", padding: "0.75rem 1rem", border: "1px solid rgba(16,0,48,0.1)", borderRadius: 8, fontSize: "0.95rem", color: "#100030", outline: "none" }} />
                   </div>
                   <div>
                     <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 600, color: "#555570", marginBottom: "0.4rem" }}>Email Address</label>
-                    <input type="email" defaultValue="hello@tomergoldes.com" disabled style={{ width: "100%", padding: "0.75rem 1rem", border: "1px solid rgba(16,0,48,0.1)", borderRadius: 8, fontSize: "0.95rem", color: "#666680", background: "#F9F9FB", outline: "none" }} />
+                    <input type="email" value={email} disabled style={{ width: "100%", padding: "0.75rem 1rem", border: "1px solid rgba(16,0,48,0.1)", borderRadius: 8, fontSize: "0.95rem", color: "#666680", background: "#F9F9FB", outline: "none" }} />
                   </div>
-                  <button style={{ alignSelf: "flex-start", padding: "0.6rem 1.25rem", background: "#100030", color: "white", border: "none", borderRadius: 8, fontSize: "0.9rem", fontWeight: 600, cursor: "pointer", marginTop: "0.5rem" }}>
-                    Save Changes
+                  <button onClick={saveName} disabled={savingName || !name.trim()} style={{ alignSelf: "flex-start", padding: "0.6rem 1.25rem", background: "#100030", color: "white", border: "none", borderRadius: 8, fontSize: "0.9rem", fontWeight: 600, cursor: savingName ? "not-allowed" : "pointer", marginTop: "0.5rem", opacity: savingName || !name.trim() ? 0.6 : 1, display: "flex", alignItems: "center", gap: "0.4rem" }}>
+                    {savingName && <Loader2 size={14} className="animate-spin" />} Save Changes
                   </button>
                 </div>
               </section>
@@ -104,10 +175,17 @@ export default function SettingsPage() {
                     {slugStatus === "checking" && <span style={{ color: "#666680" }}>Checking availability...</span>}
                     {slugStatus === "available" && <span style={{ color: "#00C853", display: "flex", alignItems: "center", gap: "0.2rem", fontWeight: 500 }}><Check size={14} /> Available</span>}
                     {slugStatus === "taken" && <span style={{ color: "#E8355A", display: "flex", alignItems: "center", gap: "0.2rem", fontWeight: 500 }}><AlertCircle size={14} /> This URL is already taken</span>}
+                    {slugStatus === "invalid" && <span style={{ color: "#E8355A", display: "flex", alignItems: "center", gap: "0.2rem", fontWeight: 500 }}><AlertCircle size={14} /> 3-40 chars: letters, numbers, hyphens</span>}
                   </div>
-                  
-                  <button style={{ alignSelf: "flex-start", padding: "0.6rem 1.25rem", background: "rgba(99,82,138,0.08)", color: "#100030", border: "none", borderRadius: 8, fontSize: "0.9rem", fontWeight: 600, cursor: "pointer", marginTop: "1rem" }}>
-                    Update Link
+
+                  {!hasProfile && (
+                    <p style={{ marginTop: "0.75rem", fontSize: "0.8rem", color: "#666680" }}>
+                      Create a video first to claim your public URL.
+                    </p>
+                  )}
+
+                  <button onClick={saveSlug} disabled={savingSlug || slugStatus === "taken" || slugStatus === "invalid" || slugStatus === "checking" || !slug} style={{ alignSelf: "flex-start", padding: "0.6rem 1.25rem", background: "rgba(99,82,138,0.08)", color: "#100030", border: "none", borderRadius: 8, fontSize: "0.9rem", fontWeight: 600, cursor: "pointer", marginTop: "1rem", opacity: savingSlug || slugStatus === "taken" || slugStatus === "invalid" || !slug ? 0.6 : 1, display: "flex", alignItems: "center", gap: "0.4rem" }}>
+                    {savingSlug && <Loader2 size={14} className="animate-spin" />} Update Link
                   </button>
                 </div>
               </section>

@@ -31,7 +31,7 @@ export default function TermsPage() {
 
             <h2 style={{ fontFamily: "var(--font-display)", fontSize: "1.5rem", color: "#100030", fontWeight: 700, marginTop: "1rem", marginBottom: "0.5rem" }}>3. User Content and AI Generation</h2>
             <p>
-              You retain all ownership rights to the CV or text you upload. By submitting content to 1IMP, you grant us and our third-party AI partners (such as OpenAI and HeyGen) a temporary license to process this data solely for the purpose of generating your video script and avatar. We do not use your personal data to train our own AI models.
+              You retain all ownership rights to the CV or text you upload. By submitting content to 1IMP, you grant us and our third-party AI partners (such as OpenAI for scripting, ElevenLabs for voice-over, and our video-rendering providers) a temporary license to process this data solely for the purpose of generating your video. We do not use your personal data to train our own AI models.
             </p>
 
             <h2 style={{ fontFamily: "var(--font-display)", fontSize: "1.5rem", color: "#100030", fontWeight: 700, marginTop: "1rem", marginBottom: "0.5rem" }}>4. Acceptable Use</h2>

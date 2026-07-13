@@ -161,26 +161,36 @@ export async function renderVideoPhase(videoProjectId: string) {
     const profile = project.candidateProfile;
     const storyboard = project.storyboard as any[]; // Assumed to match StoryboardScene[]
 
-    // 1. Generate Avatar (if not already done)
+    // Rough per-render cost accumulator (USD) for unit-economics visibility.
+    let estimatedCost = 0;
+
+    // 1. Generate Avatar (if not already done). Non-fatal: the avatar is not part
+    // of the Shotstack timeline, so a failure here should not abort the render.
     let avatarUrl = profile.avatarUrl;
     if (!avatarUrl && profile.photoUrl) {
-      console.log(`[Pipeline] Generating Ninja Avatar...`);
-      const avatarData = await generateNinjaAvatar(profile.photoUrl, {
-        gender: "neutral", // Could be inferred or asked
-        glasses: false,
-        ninjaColor: profile.ninjaColor
-      });
-      avatarUrl = avatarData.imageUrl;
-      
-      await prisma.candidateProfile.update({
-        where: { id: profile.id },
-        data: { avatarUrl, avatarSeed: avatarData.seed }
-      });
+      try {
+        console.log(`[Pipeline] Generating Ninja Avatar...`);
+        const avatarData = await generateNinjaAvatar(profile.photoUrl, {
+          gender: "neutral", // Could be inferred or asked
+          glasses: false,
+          ninjaColor: profile.ninjaColor
+        });
+        avatarUrl = avatarData.imageUrl;
+        estimatedCost += 0.1; // approx fal avatar cost
+
+        await prisma.candidateProfile.update({
+          where: { id: profile.id },
+          data: { avatarUrl, avatarSeed: avatarData.seed }
+        });
+      } catch (avatarError) {
+        console.warn("[Pipeline] Avatar generation failed; continuing without avatar.", avatarError);
+      }
     }
 
     // 2. Generate Voice-over
     console.log(`[Pipeline] Generating Voice-over...`);
     const voiceOverUrl = await generateVoiceOver(project.script || "", profile.tone);
+    estimatedCost += 0.15; // approx ElevenLabs cost
     await prisma.videoProject.update({
       where: { id: project.id },
       data: { voiceOverUrl }
@@ -189,14 +199,15 @@ export async function renderVideoPhase(videoProjectId: string) {
     // 3. Map & Generate Scenes
     console.log(`[Pipeline] Mapping Scenes...`);
     const mappedScenes = await mapScenesToAssets(storyboard, profile.id);
-    
+
     for (let i = 0; i < mappedScenes.length; i++) {
       const scene = mappedScenes[i];
       if (scene.sourceType === "generated" && scene.generationPrompt && avatarUrl) {
         console.log(`[Pipeline] Generating custom scene ${i}...`);
         scene.sourceUrl = await generateAIScene(scene.generationPrompt, avatarUrl, scene.endSec - scene.startSec);
+        estimatedCost += 0.5; // approx fal video-gen cost per scene
       }
-      
+
       // Update DB with final source URL
       const dbScene = project.scenes.find(s => s.orderIndex === scene.orderIndex);
       if (dbScene && scene.sourceUrl) {
@@ -207,13 +218,20 @@ export async function renderVideoPhase(videoProjectId: string) {
       }
     }
 
+    // Safety: never send scenes with a null source URL to the compositor.
+    const composableScenes = mappedScenes.filter((s) => !!s.sourceUrl);
+    if (composableScenes.length === 0) {
+      throw new Error("No renderable scenes were produced for this project.");
+    }
+
     // 4. Compose Video
     console.log(`[Pipeline] Composing final video...`);
-    const renderJobId = await composeVideo(mappedScenes, voiceOverUrl, avatarUrl, project.hasWatermark);
+    const renderJobId = await composeVideo(composableScenes, voiceOverUrl, avatarUrl, project.hasWatermark);
+    estimatedCost += 0.2; // approx Shotstack render cost
 
     await prisma.videoProject.update({
       where: { id: project.id },
-      data: { renderJobId }
+      data: { renderJobId, renderCost: Math.round(estimatedCost * 100) / 100 }
     });
 
     // Note: A background task or webhook would normally poll Shotstack

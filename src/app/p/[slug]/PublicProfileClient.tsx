@@ -1,8 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import { motion } from "framer-motion";
-import { Download } from "lucide-react";
-import { CustomMail, CustomMapPin, CustomBriefcase, CustomChevronRight, ThemeIconWrapper } from "@/components/ui/CustomIcons";
+import { Link2, Check } from "lucide-react";
+import { CustomMapPin, CustomBriefcase, CustomChevronRight } from "@/components/ui/CustomIcons";
 import Link from "next/link";
 import { WebStoryPlayer } from "@/components/WebStoryPlayer";
 
@@ -30,6 +31,15 @@ type ProfileProps = {
 };
 
 export default function PublicProfileClient({ profile }: ProfileProps) {
+  const [copied, setCopied] = useState(false);
+
+  const copyLink = () => {
+    if (typeof window === "undefined") return;
+    navigator.clipboard.writeText(window.location.href);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   return (
     <div style={{ background: "#FDFDFD", minHeight: "100vh", paddingBottom: "100px", fontFamily: "var(--font-body)", color: "#100030" }}>
       
@@ -66,7 +76,7 @@ export default function PublicProfileClient({ profile }: ProfileProps) {
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.5 }}
               style={{ display: "flex", alignItems: "center", gap: "1rem", color: "#555570", fontSize: "1rem", fontWeight: 500, marginBottom: "1.5rem" }}>
               <span style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}><CustomBriefcase size={18} /> {profile.role}</span>
-              <span style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}><CustomMapPin size={18} /> {profile.location}</span>
+              {profile.location && <span style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}><CustomMapPin size={18} /> {profile.location}</span>}
             </motion.div>
 
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.5 }}
@@ -150,16 +160,15 @@ export default function PublicProfileClient({ profile }: ProfileProps) {
       {/* ── Sticky Action Bar ── */}
       <motion.div initial={{ y: 100 }} animate={{ y: 0 }} transition={{ delay: 0.8, type: "spring", damping: 20 }}
         style={{ position: "fixed", bottom: 24, left: "50%", transform: "translateX(-50%)", zIndex: 100, display: "flex", gap: "0.75rem", background: "rgba(255,255,255,0.9)", backdropFilter: "blur(12px)", padding: "0.5rem", borderRadius: 999, boxShadow: "0 8px 32px rgba(16,0,48,0.15)", border: "1px solid rgba(16,0,48,0.08)" }}>
-        
-        <button style={{ display: "flex", alignItems: "center", gap: "0.4rem", padding: "0.75rem 1.25rem", background: "white", border: "1px solid rgba(16,0,48,0.1)", borderRadius: 999, fontSize: "0.9rem", fontWeight: 600, color: "#100030", cursor: "pointer", boxShadow: "0 2px 8px rgba(16,0,48,0.04)" }}>
-          <ThemeIconWrapper icon={Download} size={16} color="currentColor" />
-          <span className="hide-mobile">Download</span> CV
+
+        <button onClick={copyLink} style={{ display: "flex", alignItems: "center", gap: "0.4rem", padding: "0.75rem 1.25rem", background: "white", border: "1px solid rgba(16,0,48,0.1)", borderRadius: 999, fontSize: "0.9rem", fontWeight: 600, color: "#100030", cursor: "pointer", boxShadow: "0 2px 8px rgba(16,0,48,0.04)" }}>
+          {copied ? <Check size={16} /> : <Link2 size={16} />}
+          {copied ? "Copied" : <>Copy <span className="hide-mobile">link</span></>}
         </button>
-        
-        <a href={`mailto:hello@${profile.slug}.com?subject=Saw your 1IMP Profile`} style={{ display: "flex", alignItems: "center", gap: "0.4rem", padding: "0.75rem 1.75rem", background: "#100030", border: "none", borderRadius: 999, fontSize: "0.9rem", fontWeight: 600, color: "white", cursor: "pointer", textDecoration: "none", boxShadow: "0 4px 12px rgba(16,0,48,0.2)" }}>
-          <CustomMail size={16} />
-          Contact <span className="hide-mobile">{profile.name.split(" ")[0]}</span>
-        </a>
+
+        <Link href="/create" style={{ display: "flex", alignItems: "center", gap: "0.4rem", padding: "0.75rem 1.75rem", background: "#100030", border: "none", borderRadius: 999, fontSize: "0.9rem", fontWeight: 600, color: "white", cursor: "pointer", textDecoration: "none", boxShadow: "0 4px 12px rgba(16,0,48,0.2)" }}>
+          Create your own <span className="hide-mobile">1IMP</span>
+        </Link>
       </motion.div>
 
       <style>{`

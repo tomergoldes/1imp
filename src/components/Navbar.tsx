@@ -57,9 +57,8 @@ export default function Navbar() {
 
           {/* ── Center nav ───────────────────────────────────────────── */}
           <nav style={{ display: "flex", alignItems: "center", gap: "0.5rem", position: "absolute", left: "50%", transform: "translateX(-50%)" }} className="imp-nav">
-            {navLinks.map((link, i) => {
-              // Simulate first link as active for the visual match
-              const isActive = i === 0;
+            {navLinks.map((link) => {
+              const isActive = false;
               return (
                 <Link
                   key={link.label}
@@ -180,7 +179,7 @@ export default function Navbar() {
                 </button>
               </div>
             ) : (
-              <Link href="/signup" style={{
+              <Link href="/create" style={{
                 display: "inline-flex", alignItems: "center", gap: "6px",
                 padding: "0.65rem 1.2rem",
                 background: "#1A1A1A", 
@@ -193,8 +192,8 @@ export default function Navbar() {
                 onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "#333"; }}
                 onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "#1A1A1A"; }}
               >
-                Book A Free Meeting
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                Generate Your Video
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                   <path d="M5 19L19 5M19 5v10M19 5H9" />
                 </svg>
               </Link>
@@ -204,6 +203,9 @@ export default function Navbar() {
           {/* ── Mobile hamburger ─────────────────────────────────────── */}
           <button
             onClick={() => setMobileOpen(o => !o)}
+            aria-label={mobileOpen ? "Close menu" : "Open menu"}
+            aria-expanded={mobileOpen}
+            aria-controls="mobile-menu"
             style={{ display: "none", background: "none", border: "none", cursor: "pointer", padding: "6px", marginLeft: "auto", flexDirection: "column", gap: "5px" }}
             className="imp-hamburger"
           >
@@ -215,6 +217,7 @@ export default function Navbar() {
         <AnimatePresence>
           {mobileOpen && (
             <motion.div
+              id="mobile-menu"
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}

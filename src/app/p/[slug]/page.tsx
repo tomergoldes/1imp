@@ -2,9 +2,10 @@ import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import PublicProfileClient from "./PublicProfileClient";
 
-export default async function PublicProfilePage({ params }: { params: { slug: string } }) {
+export default async function PublicProfilePage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
   const candidateProfile = await prisma.candidateProfile.findUnique({
-    where: { slug: params.slug },
+    where: { slug },
     include: {
       user: true,
       videoProjects: {
@@ -32,7 +33,7 @@ export default async function PublicProfilePage({ params }: { params: { slug: st
     slug: candidateProfile.slug as string,
     name: parsedResume.name || candidateProfile.user.name || "Candidate",
     role: candidateProfile.targetRole || parsedResume.current_role || "Professional",
-    location: "Remote", // CV parser doesn't extract location yet, default to Remote
+    location: parsedResume.location || "",
     summary: parsedResume.raw_summary || "",
     skills: parsedResume.skills || [],
     experience: (parsedResume.work_history || []).map((work: any, i: number) => ({

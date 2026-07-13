@@ -47,13 +47,20 @@ export default function DashboardClient({
     show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } }
   };
 
+  // In-progress = any VideoProject status that isn't COMPLETED or ERROR
+  // (DRAFT, SCRIPT_READY, APPROVED, RENDERING).
+  const isInProgress =
+    !!latestVideoStatus &&
+    latestVideoStatus !== "COMPLETED" &&
+    latestVideoStatus !== "ERROR";
+
   const getVideoStatusBadge = () => {
     if (!latestVideoId) return null;
-    if (latestVideoStatus === "PENDING") {
+    if (isInProgress) {
       return (
         <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", padding: "0.4rem 0.875rem", background: "rgba(250,187,5,0.12)", borderRadius: 9999, color: "#FABB05", fontSize: "0.8125rem", fontWeight: 600 }}>
           <Clock size={14} />
-          Generating your video... (~2 min)
+          {latestVideoStatus === "RENDERING" ? "Rendering your video... (~2 min)" : "Finishing your video..."}
         </div>
       );
     }
@@ -73,7 +80,7 @@ export default function DashboardClient({
         </div>
       );
     }
-    if (latestVideoStatus === "FAILED") {
+    if (latestVideoStatus === "ERROR") {
       return (
         <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", padding: "0.4rem 0.875rem", background: "rgba(232,53,90,0.12)", borderRadius: 9999, color: "#E8355A", fontSize: "0.8125rem", fontWeight: 600 }}>
           <AlertCircle size={14} />
@@ -133,7 +140,7 @@ export default function DashboardClient({
                   {copied ? "Copied!" : "Copy Link"}
                 </button>
               )}
-              {latestVideoStatus === "PENDING" ? (
+              {isInProgress ? (
                 <button disabled style={{
                   display: "flex", alignItems: "center", gap: "0.5rem",
                   padding: "0.6rem 1rem", background: "#ccc", color: "white",

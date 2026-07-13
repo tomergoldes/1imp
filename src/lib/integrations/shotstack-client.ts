@@ -11,6 +11,18 @@
 
 import type { MappedScene } from "../engines/scene-mapper";
 
+/**
+ * Builds the Shotstack callback URL. Because Shotstack does not sign its webhooks,
+ * we authenticate the callback by embedding a shared secret token in the URL and
+ * verifying it in the webhook handler.
+ */
+function buildCallbackUrl(): string {
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://1imp.com";
+  const secret = process.env.SHOTSTACK_WEBHOOK_SECRET;
+  const suffix = secret ? `?token=${encodeURIComponent(secret)}` : "";
+  return `${baseUrl}/api/webhooks/shotstack${suffix}`;
+}
+
 export interface ShotstackRenderStatus {
   id: string;
   status: "queued" | "processing" | "done" | "failed";
@@ -114,7 +126,7 @@ export async function composeVideo(
           resolution: "1080", // 1080x1920 portrait
           aspectRatio: "9:16"
         },
-        callback: `${process.env.NEXT_PUBLIC_APP_URL || 'https://1imp.com'}/api/webhooks/shotstack`
+        callback: buildCallbackUrl()
       })
     });
     

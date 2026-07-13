@@ -49,7 +49,7 @@ export async function POST(req: Request) {
   } catch (error: any) {
     console.error("[Generate Story API] Error:", error);
     return NextResponse.json(
-      { error: error.message || "Failed to generate story" },
+      { error: "Failed to generate story. Please try again." },
       { status: 500 }
     );
   }

@@ -4,13 +4,14 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
-import { LayoutDashboard, PenTool, Settings, LogOut, Menu, X, Video } from "lucide-react";
+import { LayoutDashboard, PenTool, Settings, LogOut, Menu, X, Video, Share2 } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { CreditDisplay } from "./components/CreditDisplay";
 
 const navItems = [
   { name: "Overview", href: "/dashboard", icon: LayoutDashboard },
   { name: "Videos", href: "/dashboard/videos", icon: Video },
+  { name: "Share", href: "/dashboard/share", icon: Share2 },
   { name: "Editor", href: "/editor", icon: PenTool },
   { name: "Settings", href: "/dashboard/settings", icon: Settings },
 ];

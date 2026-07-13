@@ -4,77 +4,90 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import Stripe from "stripe";
 import { prisma } from "@/lib/prisma";
 
-// We use a dummy test key if none is provided in .env
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "sk_test_mock123", {
-  apiVersion: "2024-04-10" as any,
-});
+const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+
+// Lazily construct the Stripe client so an unset key doesn't throw at import time
+// (which would break build-time page-data collection).
+function getStripe(): Stripe | null {
+  if (!stripeSecretKey) return null;
+  return new Stripe(stripeSecretKey, { apiVersion: "2024-04-10" as any });
+}
+
+const MAX_CREDITS_PER_CHECKOUT = 100;
+const CREDIT_PRICE_CENTS = 299; // $2.99 per credit
+const VIDEO_UNLOCK_CENTS = 999; // $9.99 per video
+
+function baseUrl(): string {
+  return process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+}
 
 export async function POST(req: Request) {
   try {
+    const stripe = getStripe();
+    if (!stripe) {
+      return NextResponse.json({ error: "Payments are not configured." }, { status: 503 });
+    }
+
     const session = await getServerSession(authOptions);
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const userId = (session.user as any).id;
     const { credits, videoId } = await req.json();
-    
-    // If unlocking a specific video
-    if (videoId) {
-      try {
-        const checkoutSession = await stripe.checkout.sessions.create({
-          payment_method_types: ["card"],
-          line_items: [
-            {
-              price_data: {
-                currency: "usd",
-                product_data: {
-                  name: "1IMP Premium Video Unlock",
-                  description: "Remove watermark, enable HD downloads, and get a shareable profile.",
-                },
-                unit_amount: 999, // $9.99
-              },
-              quantity: 1,
-            },
-          ],
-          mode: "payment",
-          success_url: `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/v/${videoId}?success=true`,
-          cancel_url: `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/v/${videoId}?canceled=true`,
-          metadata: {
-            userId: (session.user as any).id,
-            videoId: videoId
-          }
-        });
-        return NextResponse.json({ url: checkoutSession.url });
-      } catch (stripeErr: any) {
-        if (process.env.NODE_ENV === "development") {
-          console.warn("Stripe checkout failed (mocking success redirect for dev mode):", stripeErr.message);
-          
-          // Actually update the DB to simulate webhook success since we skip it
-          await prisma.payment.create({
-            data: {
-              userId: (session.user as any).id,
-              amount: 999,
-              status: "COMPLETED",
-              stripeId: "mock-sess-" + Date.now(),
-              creditsAdded: 0
-            }
-          });
-          
-          await prisma.videoProject.update({
-            where: { id: videoId },
-            data: { hasWatermark: false, isDownloadable: true }
-          });
 
-          return NextResponse.json({ url: `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/v/${videoId}?success=true` });
-        }
-        throw stripeErr;
+    // --- Flow 1: Unlock a specific video ---
+    if (videoId) {
+      if (typeof videoId !== "string") {
+        return NextResponse.json({ error: "Invalid videoId" }, { status: 400 });
       }
+
+      // Ownership check: users can only pay to unlock their own videos.
+      const project = await prisma.videoProject.findUnique({
+        where: { id: videoId },
+        select: { id: true, userId: true },
+      });
+
+      if (!project || project.userId !== userId) {
+        return NextResponse.json({ error: "Not found or unauthorized" }, { status: 404 });
+      }
+
+      const checkoutSession = await stripe.checkout.sessions.create({
+        payment_method_types: ["card"],
+        line_items: [
+          {
+            price_data: {
+              currency: "usd",
+              product_data: {
+                name: "1IMP Premium Video Unlock",
+                description: "Remove watermark, enable HD downloads, and get a shareable profile.",
+              },
+              unit_amount: VIDEO_UNLOCK_CENTS,
+            },
+            quantity: 1,
+          },
+        ],
+        mode: "payment",
+        success_url: `${baseUrl()}/v/${videoId}?success=true`,
+        cancel_url: `${baseUrl()}/v/${videoId}?canceled=true`,
+        metadata: {
+          userId,
+          videoId,
+        },
+      });
+      return NextResponse.json({ url: checkoutSession.url });
     }
 
-    // Default flow: Example pricing: 1 Credit = $2.99
-    const amount = credits * 299;
+    // --- Flow 2: Buy credits ---
+    if (!Number.isInteger(credits) || credits < 1 || credits > MAX_CREDITS_PER_CHECKOUT) {
+      return NextResponse.json(
+        { error: `Credits must be a whole number between 1 and ${MAX_CREDITS_PER_CHECKOUT}.` },
+        { status: 400 }
+      );
+    }
 
-    // Create Checkout Session
+    const amount = credits * CREDIT_PRICE_CENTS;
+
     const checkoutSession = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       line_items: [
@@ -91,17 +104,17 @@ export async function POST(req: Request) {
         },
       ],
       mode: "payment",
-      success_url: `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/dashboard?success=true`,
-      cancel_url: `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/pricing?canceled=true`,
+      success_url: `${baseUrl()}/dashboard?success=true`,
+      cancel_url: `${baseUrl()}/pricing?canceled=true`,
       metadata: {
-        userId: (session.user as any).id,
-        credits: credits.toString()
-      }
+        userId,
+        credits: credits.toString(),
+      },
     });
 
     return NextResponse.json({ url: checkoutSession.url });
   } catch (error: any) {
     console.error("Stripe Checkout Error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: "Failed to start checkout" }, { status: 500 });
   }
 }

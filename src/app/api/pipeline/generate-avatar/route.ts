@@ -11,6 +11,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const userId = (session.user as any).id;
     const { candidateProfileId, photoUrl, preferences } = await req.json();
 
     if (!candidateProfileId || !photoUrl) {
@@ -18,6 +19,16 @@ export async function POST(req: Request) {
         { error: "Missing required parameters" },
         { status: 400 }
       );
+    }
+
+    // Ownership check: the profile must belong to the current user
+    const profile = await prisma.candidateProfile.findUnique({
+      where: { id: candidateProfileId },
+      select: { userId: true },
+    });
+
+    if (!profile || profile.userId !== userId) {
+      return NextResponse.json({ error: "Not found or unauthorized" }, { status: 404 });
     }
 
     // Call fal.ai to generate the avatar
@@ -43,7 +54,7 @@ export async function POST(req: Request) {
   } catch (error: any) {
     console.error("[Generate Avatar API] Error:", error);
     return NextResponse.json(
-      { error: error.message || "Failed to generate avatar" },
+      { error: "Failed to generate avatar" },
       { status: 500 }
     );
   }

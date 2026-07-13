@@ -23,27 +23,27 @@ export default function AdminSettingsPage() {
   ];
 
   useEffect(() => {
-    fetchConfigs();
-  }, []);
-
-  const fetchConfigs = async () => {
-    try {
-      const res = await fetch("/api/admin/config");
-      if (res.ok) {
-        const data = await res.json();
-        // Merge with defaults if they don't exist yet
-        const merged = defaultKeys.map(dk => {
-          const existing = data.find((d: Config) => d.key === dk.key);
-          return existing || { key: dk.key, value: "", description: dk.desc };
-        });
-        setConfigs(merged);
+    const fetchConfigs = async () => {
+      try {
+        const res = await fetch("/api/admin/config");
+        if (res.ok) {
+          const data = await res.json();
+          // Merge with defaults if they don't exist yet
+          const merged = defaultKeys.map(dk => {
+            const existing = data.find((d: Config) => d.key === dk.key);
+            return existing || { key: dk.key, value: "", description: dk.desc };
+          });
+          setConfigs(merged);
+        }
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
+    fetchConfigs();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleChange = (key: string, newValue: string) => {
     setConfigs(configs.map(c => c.key === key ? { ...c, value: newValue } : c));

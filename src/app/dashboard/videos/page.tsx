@@ -34,7 +34,7 @@ export default async function VideosPage() {
             </p>
           </div>
           
-          <Link href="/dashboard/studio" style={{
+          <Link href="/create" style={{
             display: "inline-flex", alignItems: "center", gap: "0.5rem",
             padding: "0.75rem 1.5rem", background: "linear-gradient(135deg, #E8355A 0%, #6361B8 100%)", color: "white",
             border: "none", borderRadius: 12, fontSize: "1rem", fontWeight: 600, textDecoration: "none",
@@ -50,9 +50,9 @@ export default async function VideosPage() {
               <Video size={36} />
             </div>
             <h2 style={{ fontFamily: "var(--font-display)", fontSize: "1.5rem", color: "#100030", marginBottom: "0.5rem", fontWeight: 700 }}>No videos yet</h2>
-            <p style={{ color: "#555570", marginBottom: "2rem" }}>You haven't generated any AI videos yet.</p>
-            <Link href="/dashboard/studio" style={{ padding: "0.75rem 1.5rem", background: "#100030", color: "white", borderRadius: 8, fontWeight: 600, textDecoration: "none" }}>
-              Go to Studio
+            <p style={{ color: "#555570", marginBottom: "2rem" }}>You haven&apos;t generated any AI videos yet.</p>
+            <Link href="/create" style={{ padding: "0.75rem 1.5rem", background: "#100030", color: "white", borderRadius: 8, fontWeight: 600, textDecoration: "none" }}>
+              Create a Video
             </Link>
           </div>
         ) : (

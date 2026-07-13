@@ -6,7 +6,7 @@ import { checkRenderStatus } from "@/lib/integrations/shotstack-client";
 
 export async function GET(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -14,14 +14,15 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const videoProjectId = params.id;
+    const userId = (session.user as any).id;
+    const { id: videoProjectId } = await params;
     const project = await prisma.videoProject.findUnique({
       where: { id: videoProjectId },
-      select: { id: true, status: true, renderJobId: true, videoUrl: true }
+      select: { id: true, userId: true, status: true, renderJobId: true, videoUrl: true }
     });
 
-    if (!project) {
-      return NextResponse.json({ error: "Project not found" }, { status: 404 });
+    if (!project || project.userId !== userId) {
+      return NextResponse.json({ error: "Not found or unauthorized" }, { status: 404 });
     }
 
     // If it's still rendering and we have a job ID, we can optionally poll Shotstack
@@ -52,7 +53,7 @@ export async function GET(
   } catch (error: any) {
     console.error("[Pipeline Status API] Error:", error);
     return NextResponse.json(
-      { error: error.message || "Failed to get status" },
+      { error: "Failed to get status" },
       { status: 500 }
     );
   }

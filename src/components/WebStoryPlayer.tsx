@@ -23,74 +23,82 @@ interface WebStoryPlayerProps {
 }
 
 export function WebStoryPlayer({ hasWatermark, videoUrl, scenes = [] }: WebStoryPlayerProps) {
+  // Pick a renderer as a component so hooks are never called conditionally.
+  if (videoUrl) {
+    return <RenderedVideoPlayer hasWatermark={hasWatermark} videoUrl={videoUrl} />;
+  }
+  return <ScenePreviewPlayer hasWatermark={hasWatermark} scenes={scenes} />;
+}
+
+function RenderedVideoPlayer({ hasWatermark, videoUrl }: { hasWatermark: boolean; videoUrl: string }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+
+  return (
+    <div
+      className="relative w-full max-w-[480px] h-full max-h-[850px] mx-auto bg-[#050014] overflow-hidden shadow-[0_0_40px_rgba(0,0,0,0.5)] rounded-none sm:rounded-2xl flex items-center justify-center"
+      onContextMenu={(e) => hasWatermark && e.preventDefault()}
+    >
+      <video
+        ref={videoRef}
+        src={videoUrl}
+        playsInline
+        loop
+        muted={isMuted}
+        onClick={() => {
+          if (videoRef.current?.paused) {
+            videoRef.current.play();
+            setIsPlaying(true);
+          } else {
+            videoRef.current?.pause();
+            setIsPlaying(false);
+          }
+        }}
+        className="w-full h-full object-cover cursor-pointer"
+      />
+
+      {/* Play/Pause Overlay */}
+      {!isPlaying && (
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none bg-black/20">
+          <div className="w-20 h-20 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white pl-2">
+            <Play size={40} fill="currentColor" />
+          </div>
+        </div>
+      )}
+
+      {/* Controls */}
+      <div className="absolute bottom-6 right-6 flex gap-3 z-20">
+        <button
+          onClick={(e) => { e.stopPropagation(); setIsMuted(!isMuted); }}
+          aria-label={isMuted ? "Unmute video" : "Mute video"}
+          className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center text-white border border-white/10 hover:bg-black/60 transition-colors"
+        >
+          {isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
+        </button>
+      </div>
+
+      {/* Watermark */}
+      {hasWatermark && (
+        <div className="absolute top-6 left-6 px-3 py-1.5 rounded-md bg-black/40 backdrop-blur-md border border-white/10 text-white/90 text-xs font-bold tracking-wider z-20" style={{ fontFamily: "var(--font-display)" }}>
+          MADE WITH 1IMP
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ScenePreviewPlayer({ hasWatermark, scenes }: { hasWatermark: boolean; scenes: VideoScene[] }) {
   const [currentSceneIndex, setCurrentSceneIndex] = useState(0);
   const [progress, setProgress] = useState(0);
 
-  // If we have a final rendered video, use the native video player approach
-  if (videoUrl) {
-    return (
-      <div 
-        className="relative w-full max-w-[480px] h-full max-h-[850px] mx-auto bg-[#050014] overflow-hidden shadow-[0_0_40px_rgba(0,0,0,0.5)] rounded-none sm:rounded-2xl flex items-center justify-center"
-        onContextMenu={(e) => hasWatermark && e.preventDefault()}
-      >
-        <video 
-          ref={videoRef}
-          src={videoUrl}
-          playsInline
-          loop
-          muted={isMuted}
-          onClick={() => {
-            if (videoRef.current?.paused) {
-              videoRef.current.play();
-              setIsPlaying(true);
-            } else {
-              videoRef.current?.pause();
-              setIsPlaying(false);
-            }
-          }}
-          className="w-full h-full object-cover cursor-pointer"
-        />
-        
-        {/* Play/Pause Overlay */}
-        {!isPlaying && (
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none bg-black/20">
-            <div className="w-20 h-20 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white pl-2">
-              <Play size={40} fill="currentColor" />
-            </div>
-          </div>
-        )}
-
-        {/* Controls */}
-        <div className="absolute bottom-6 right-6 flex gap-3 z-20">
-          <button 
-            onClick={(e) => { e.stopPropagation(); setIsMuted(!isMuted); }}
-            className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center text-white border border-white/10 hover:bg-black/60 transition-colors"
-          >
-            {isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
-          </button>
-        </div>
-
-        {/* Watermark */}
-        {hasWatermark && (
-          <div className="absolute top-6 left-6 px-3 py-1.5 rounded-md bg-black/40 backdrop-blur-md border border-white/10 text-white/90 text-xs font-bold tracking-wider z-20" style={{ fontFamily: "var(--font-display)" }}>
-            MADE WITH 1IMP
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  // Otherwise, render the dynamic HTML/CSS slides based on scenes (Preview mode)
   useEffect(() => {
     if (!scenes || scenes.length === 0) return;
-    
+
     const currentScene = scenes[currentSceneIndex];
     const durationMs = (currentScene.endSec - currentScene.startSec) * 1000;
-    
-    let startTime = Date.now();
+
+    const startTime = Date.now();
     let animationFrame: number;
 
     const animate = () => {
@@ -182,7 +190,7 @@ export function WebStoryPlayer({ hasWatermark, videoUrl, scenes = [] }: WebStory
                 className="bg-black/40 backdrop-blur-md border border-white/10 rounded-xl p-4"
               >
                 <p className="text-white/90 text-sm font-medium leading-relaxed italic">
-                  "{currentScene.voiceoverText}"
+                  &ldquo;{currentScene.voiceoverText}&rdquo;
                 </p>
               </motion.div>
             </div>

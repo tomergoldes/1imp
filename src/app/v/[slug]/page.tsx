@@ -31,7 +31,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 export default async function VideoPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
 
-  let project = await prisma.videoProject.findUnique({
+  const project = await prisma.videoProject.findUnique({
     where: { id: slug },
     include: { 
       user: true,

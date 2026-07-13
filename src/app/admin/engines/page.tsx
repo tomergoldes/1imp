@@ -21,22 +21,21 @@ export default function AdminEnginesPage() {
   const [saveSuccessId, setSaveSuccessId] = useState<string | null>(null);
 
   useEffect(() => {
+    const fetchPrompts = async () => {
+      try {
+        const res = await fetch("/api/admin/prompts");
+        const data = await res.json();
+        if (data.success) {
+          setPrompts(data.prompts);
+        }
+      } catch (error) {
+        console.error("Failed to load prompts", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
     fetchPrompts();
   }, []);
-
-  const fetchPrompts = async () => {
-    try {
-      const res = await fetch("/api/admin/prompts");
-      const data = await res.json();
-      if (data.success) {
-        setPrompts(data.prompts);
-      }
-    } catch (error) {
-      console.error("Failed to load prompts", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const startEdit = (prompt: PromptData) => {
     setEditingId(prompt.id);

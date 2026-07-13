@@ -12,7 +12,7 @@ export default async function AdminUsersPage() {
       isAdmin: true,
       createdAt: true,
       _count: {
-        select: { videos: true }
+        select: { videoProjects: true }
       }
     },
     orderBy: {

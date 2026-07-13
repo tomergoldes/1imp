@@ -26,7 +26,7 @@ export default function PrivacyPage() {
 
             <h2 style={{ fontFamily: "var(--font-display)", fontSize: "1.5rem", color: "#100030", fontWeight: 700, marginTop: "1rem", marginBottom: "0.5rem" }}>2. How We Use and Process Your Information</h2>
             <p>
-              We use your data primarily to provide the 1IMP service—specifically to write a professional script and generate an AI video. To accomplish this, we transmit your text and image data via encrypted API calls to our third-party AI providers (e.g., OpenAI, HeyGen).
+              We use your data primarily to provide the 1IMP service—specifically to write a professional script and generate an AI video. To accomplish this, we transmit your text and image data via encrypted API calls to our third-party AI providers (e.g., OpenAI for scripting, ElevenLabs for voice-over, and our video-rendering providers).
             </p>
 
             <h2 style={{ fontFamily: "var(--font-display)", fontSize: "1.5rem", color: "#100030", fontWeight: 700, marginTop: "1rem", marginBottom: "0.5rem" }}>3. Data Sharing and Third Parties</h2>
