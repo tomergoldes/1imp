@@ -2,7 +2,7 @@ import { openai } from "@ai-sdk/openai";
 import { generateText } from "ai";
 import { prisma } from "@/lib/prisma";
 import { sendVideoReadyEmail } from "./email-service";
-
+import { generateStoryPhase } from "./engines/video-pipeline";
 /**
  * Generate a script using the new Master Prompt
  */
@@ -209,6 +209,44 @@ export async function generateFreeVideoWorkflow(userId: string, cvText: string, 
     return video;
   } catch (error) {
     console.error("Failed in free video workflow", error);
+    throw error;
+  }
+}
+
+/**
+ * NEW WORKFLOW: Generates a complete Candidate Story Video
+ * This triggers Phase 1 of the new pipeline (Story Generation).
+ */
+export async function generateStoryVideoWorkflow(
+  userId: string,
+  cvText: string,
+  answers: any,
+  photoUrl: string | null,
+  targetRole: string | null,
+  targetIndustry: string | null,
+  tone: string = "Professional",
+  ninjaColor: string = "#6361B8"
+) {
+  try {
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new Error("User not found");
+
+    // Start Phase 1 (Parsing, Brain, Script, Storyboard)
+    const result = await generateStoryPhase({
+      userId,
+      cvText,
+      targetRole,
+      targetIndustry,
+      jobDescription: null,
+      answers,
+      photoUrl,
+      tone,
+      ninjaColor
+    });
+
+    return result;
+  } catch (error) {
+    console.error("Failed in Story Video workflow", error);
     throw error;
   }
 }

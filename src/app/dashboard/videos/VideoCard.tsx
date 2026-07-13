@@ -1,6 +1,6 @@
 "use client";
 
-import { Video as VideoModel } from "@prisma/client";
+import { VideoProject as VideoModel } from "@prisma/client";
 import { Download, Link as LinkIcon, Loader2, PlayCircle, Trash2 } from "lucide-react";
 import { motion } from "framer-motion";
 import Link from "next/link";

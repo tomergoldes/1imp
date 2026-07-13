@@ -4,7 +4,6 @@ import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { CustomCheck } from "@/components/ui/CustomIcons";
-import { Button } from "@/components/ui/button";
 
 export default function PricingPage() {
   return (
@@ -51,9 +50,9 @@ export default function PricingPage() {
               </div>
               
               <Link href="/create" passHref style={{ textDecoration: 'none' }}>
-                <Button variant="outline" className="w-full py-6 text-lg rounded-xl border-gray-300 text-gray-700 hover:bg-gray-50">
+                <button className="w-full py-4 text-lg rounded-xl border border-gray-300 text-gray-700 bg-transparent cursor-pointer font-semibold transition hover:bg-gray-50 flex items-center justify-center">
                   Try it for Free
-                </Button>
+                </button>
               </Link>
             </motion.div>
 
@@ -86,9 +85,9 @@ export default function PricingPage() {
               </div>
 
               <Link href="/create" passHref style={{ textDecoration: 'none' }}>
-                <Button className="w-full py-6 text-lg rounded-xl bg-[#E8355A] text-white hover:bg-[#D02045] shadow-[0_4px_16px_rgba(232,53,90,0.3)]">
+                <button className="w-full py-4 text-lg rounded-xl bg-[#E8355A] text-white cursor-pointer font-semibold transition hover:bg-[#D02045] shadow-[0_4px_16px_rgba(232,53,90,0.3)] flex items-center justify-center border-none">
                   Create Now
-                </Button>
+                </button>
               </Link>
             </motion.div>
 

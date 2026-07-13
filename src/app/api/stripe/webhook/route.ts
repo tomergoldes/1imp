@@ -39,7 +39,7 @@ export async function POST(req: Request) {
     if (videoId) {
       try {
         // 1. Unlock video
-        const updatedVideo = await prisma.video.update({
+        const updatedVideo = await prisma.videoProject.update({
           where: { id: videoId },
           data: {
             hasWatermark: false,

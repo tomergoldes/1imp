@@ -14,7 +14,7 @@ export default async function VideosPage() {
   }
 
   // Fetch all videos for this user, ordered by newest first
-  const videos = await prisma.video.findMany({
+  const videos = await prisma.videoProject.findMany({
     where: { userId: (session.user as any).id },
     orderBy: { createdAt: 'desc' }
   });

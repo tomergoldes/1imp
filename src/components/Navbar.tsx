@@ -30,71 +30,64 @@ export default function Navbar() {
   return (
     <>
       <header style={{
-        position: "fixed", top: 0, left: 0, right: 0, zIndex: 200,
-        background: scrolled ? "rgba(255,255,255,0.98)" : "rgba(255,255,255,0.8)",
-        backdropFilter: "blur(12px)",
-        WebkitBackdropFilter: "blur(12px)",
-        borderBottom: scrolled ? "1px solid rgba(16,0,48,0.05)" : "1px solid rgba(255,255,255,0.3)",
+        position: "fixed", top: "20px", left: "50%", transform: "translateX(-50%)", zIndex: 200,
+        width: "calc(100% - 40px)", maxWidth: 1100, height: 60,
+        background: "white",
+        borderRadius: 100,
+        boxShadow: "0 4px 24px rgba(0,0,0,0.06)",
         transition: "all 320ms cubic-bezier(0.16, 1, 0.3, 1)",
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        padding: "0 8px 0 24px"
       }}>
-        <div style={{
-          maxWidth: 1280, margin: "0 auto", padding: "0 2rem",
-          display: "flex", alignItems: "center", justifyContent: "space-between", height: 72,
-        }}>
-
           {/* ── Logo ─────────────────────────────────────────────────── */}
-          <Link href={session?.user ? "/dashboard" : "/"} style={{ display: "flex", alignItems: "center", gap: "0.45rem", textDecoration: "none", flexShrink: 0 }}>
-            {/* Sword slash mark — blade diagonal + sweeping motion arc + tip dot */}
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              {/* Wide sweeping arc — the sword's motion trail */}
-              <path d="M 5 19 C 2 10 10 2 19 5" stroke="#E8355A" strokeWidth="1.1" fill="none" strokeLinecap="round" strokeOpacity="0.45"/>
-              {/* The blade — clean diagonal slash */}
-              <line x1="5" y1="19" x2="19" y2="5" stroke="#E8355A" strokeWidth="2.2" strokeLinecap="round"/>
-              {/* Impact point at tip */}
-              <circle cx="19.5" cy="4.5" r="1.4" fill="#E8355A"/>
+          <Link href={session?.user ? "/dashboard" : "/"} style={{ display: "flex", alignItems: "center", gap: "0.6rem", textDecoration: "none", flexShrink: 0 }}>
+            {/* Swirly-ish minimalist logo placeholder matching the vibe */}
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="#1A1A1A" strokeWidth="2.5"/>
+              <path d="M7 12C7 9.23858 9.23858 7 12 7" stroke="#1A1A1A" strokeWidth="2.5" strokeLinecap="round"/>
             </svg>
             <span style={{
-              fontFamily: "var(--font-body)", fontWeight: 500,
-              fontSize: "1.1rem", letterSpacing: "-0.01em",
-              color: "#0A001F",
+              fontFamily: "var(--font-display)", fontWeight: 800,
+              fontSize: "1.2rem", letterSpacing: "-0.02em",
+              color: "#1A1A1A",
             }}>
               1IMP
             </span>
           </Link>
 
           {/* ── Center nav ───────────────────────────────────────────── */}
-          <nav style={{ display: "flex", alignItems: "center", gap: "1rem", position: "absolute", left: "50%", transform: "translateX(-50%)" }} className="imp-nav">
-            {navLinks.map((link, i) => (
-              <Link
-                key={link.label}
-                href={link.href}
-                style={{
-                  display: "flex", alignItems: "center", gap: "4px",
-                  padding: "0.5rem 0.75rem",
-                  fontSize: "0.9375rem",
-                  fontWeight: 500,
-                  color: activeHover === link.label ? "#5858D7" : "#100030",
-                  textDecoration: "none",
-                  transition: "color 150ms ease",
-                  fontFamily: "var(--font-body)",
-                  whiteSpace: "nowrap",
-                }}
-                onMouseEnter={() => setActiveHover(link.label)}
-                onMouseLeave={() => setActiveHover(null)}
-              >
-                {link.label}
-                <ChevronDown 
-                  size={13} 
-                  style={{ 
-                    opacity: 0.4, 
-                    marginTop: "1px",
-                    transform: activeHover === link.label ? "rotate(180deg)" : "rotate(0deg)",
-                    transition: "transform 200ms ease",
-                    flexShrink: 0
-                  }} 
-                />
-              </Link>
-            ))}
+          <nav style={{ display: "flex", alignItems: "center", gap: "0.5rem", position: "absolute", left: "50%", transform: "translateX(-50%)" }} className="imp-nav">
+            {navLinks.map((link, i) => {
+              // Simulate first link as active for the visual match
+              const isActive = i === 0;
+              return (
+                <Link
+                  key={link.label}
+                  href={link.href}
+                  style={{
+                    display: "flex", alignItems: "center",
+                    padding: "0.4rem 1.1rem",
+                    fontSize: "0.9rem",
+                    fontWeight: 600,
+                    color: "#1A1A1A",
+                    textDecoration: "none",
+                    fontFamily: "var(--font-body)",
+                    whiteSpace: "nowrap",
+                    border: isActive ? "1px solid rgba(0,0,0,0.8)" : "1px solid transparent",
+                    borderRadius: 100,
+                    transition: "all 200ms ease",
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isActive) e.currentTarget.style.color = "#666";
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isActive) e.currentTarget.style.color = "#1A1A1A";
+                  }}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
           </nav>
 
           {/* ── Right side ───────────────────────────────────────────── */}
@@ -187,38 +180,24 @@ export default function Navbar() {
                 </button>
               </div>
             ) : (
-              <>
-                {/* Sign up */}
-                <Link href="/signup" style={{
-                  fontSize: "0.9375rem", fontWeight: 600,
-                  color: "#100030",
-                  textDecoration: "none",
-                  fontFamily: "var(--font-body)", transition: "color 150ms",
-                  padding: "0.5rem"
-                }}
-                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = "#E8355A"; }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = "#100030"; }}
-                >
-                  Sign up
-                </Link>
-
-                {/* Log in */}
-                <Link href="/login" style={{
-                  display: "inline-flex", alignItems: "center",
-                  padding: "0.6rem 1.4rem",
-                  background: "#0A001F", 
-                  color: "white", borderRadius: 9999,
-                  fontSize: "0.9375rem", fontWeight: 600,
-                  textDecoration: "none", fontFamily: "var(--font-body)",
-                  transition: "background 150ms ease",
-                  whiteSpace: "nowrap",
-                }}
-                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "#190040"; }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "#0A001F"; }}
-                >
-                  Log in
-                </Link>
-              </>
+              <Link href="/signup" style={{
+                display: "inline-flex", alignItems: "center", gap: "6px",
+                padding: "0.65rem 1.2rem",
+                background: "#1A1A1A", 
+                color: "white", borderRadius: 100,
+                fontSize: "0.9rem", fontWeight: 600,
+                textDecoration: "none", fontFamily: "var(--font-body)",
+                transition: "background 200ms ease",
+                whiteSpace: "nowrap",
+              }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "#333"; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "#1A1A1A"; }}
+              >
+                Book A Free Meeting
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M5 19L19 5M19 5v10M19 5H9" />
+                </svg>
+              </Link>
             )}
           </div>
 
@@ -232,8 +211,6 @@ export default function Navbar() {
             <motion.div animate={{ opacity: mobileOpen ? 0 : 1 }} style={{ width: 22, height: 2, background: "#100030", borderRadius: 2 }} transition={{ duration: 0.2 }} />
             <motion.div animate={{ rotate: mobileOpen ? -45 : 0, y: mobileOpen ? -7 : 0 }} style={{ width: 22, height: 2, background: "#100030", borderRadius: 2, transformOrigin: "center" }} transition={{ duration: 0.2 }} />
           </button>
-        </div>
-
         {/* ── Mobile menu ──────────────────────────────────────────────── */}
         <AnimatePresence>
           {mobileOpen && (

@@ -32,6 +32,7 @@ export function AdminSidebar() {
         <AdminNavLink href="/admin" icon={<Home size={18} />} label="Overview" active={pathname === "/admin"} />
         <AdminNavLink href="/admin/users" icon={<Users size={18} />} label="Users" active={pathname.startsWith("/admin/users")} />
         <AdminNavLink href="/admin/videos" icon={<Video size={18} />} label="Videos" active={pathname.startsWith("/admin/videos")} />
+        <AdminNavLink href="/admin/engines" icon={<Settings size={18} />} label="AI Engines" active={pathname.startsWith("/admin/engines")} />
         <AdminNavLink href="/admin/payments" icon={<CreditCard size={18} />} label="Payments" active={pathname.startsWith("/admin/payments")} />
         
         <div style={{ marginTop: "auto" }}>

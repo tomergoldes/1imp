@@ -15,6 +15,7 @@ const fv = (delay = 0): any => ({
 
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import CinematicHero from "@/components/CinematicHero";
 
 /* ══════════════════════════════════════════════════════════════════════════
    HERO — exact Voyantis: rounded card, flowers illustration, coral + outline btns
@@ -278,9 +279,10 @@ function HowItWorksSection() {
     else setActive(3);
   });
 
-  const magicX = useTransform(scrollYProgress, [0, 1], ["-10%", "10%"]);
-  const magicScale = useTransform(scrollYProgress, [0, 0.5, 1], [0.95, 1.05, 0.95]);
-  const magicRotate = useTransform(scrollYProgress, [0, 1], [-2, 2]);
+  // Shuriken movement transforms
+  const shurikenX = useTransform(scrollYProgress, [0, 1], ["-30vw", "30vw"]);
+  const shurikenRotate = useTransform(scrollYProgress, [0, 1], [0, 720]);
+  const shurikenY = useTransform(scrollYProgress, [0, 0.5, 1], [0, -50, 0]); // slight bounce
 
   // The dark chart card at the top (like Voyantis flow diagram)
   return (
@@ -347,54 +349,51 @@ function HowItWorksSection() {
           </h2>
         </div>
 
-        {/* TABS ROW */}
-        <div ref={scrollContainerRef} className="scroll-jack-container">
-          <div className="scroll-jack-sticky">
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "1rem", alignItems: "flex-start" }} className="tabs-grid">
-              {tabs.map((tab, i) => {
-            const isActive = active === i;
-            return (
-              <motion.div 
-                key={i} 
-                onClick={() => setActive(i)}
-                initial={{ opacity: 1, y: 0 }} animate={inView ? { opacity: 1, y: 0 } : {}}
-                transition={{ delay: i * 0.07, duration: 0.45 }}
-                style={{
-                  background: isActive ? "white" : "#EBE9F5",
-                  borderRadius: 12,
-                  padding: "1.5rem",
-                  cursor: "pointer",
-                  boxShadow: isActive ? "0 10px 40px rgba(16,0,48,0.06)" : "none",
-                  transition: "all 200ms",
-                  display: "flex", flexDirection: "column",
-                  border: isActive ? "1px solid rgba(16,0,48,0.04)" : "1px solid transparent",
-                }}
-              >
-                <div style={{ fontSize: "0.75rem", fontWeight: 600, color: isActive ? "#6361B8" : "#9B97C8", marginBottom: "1rem" }}>
-                  {tab.num}
-                </div>
-                <div style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "1.1rem", color: isActive ? "#100030" : "#9B97C8", marginBottom: isActive ? "1rem" : 0 }}>
-                  {tab.title}
-                </div>
-                <AnimatePresence>
-                  {isActive && (
-                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} transition={{ duration: 0.3 }} style={{ overflow: "hidden" }}>
-                      <p style={{ fontSize: "0.85rem", color: "#555570", lineHeight: 1.6, marginBottom: "1rem", marginTop: "1rem" }}>{tab.desc}</p>
-                      <p style={{ fontSize: "0.75rem", color: "#9B97C8", lineHeight: 1.5 }}>{tab.detail}</p>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </motion.div>
-            );
-          })}
-            </div>
+        {/* TABS & SHURIKEN SCROLL-JACK CONTAINER */}
+        <div ref={scrollContainerRef} className="scroll-jack-container" style={{ height: "400vh", position: "relative", marginBottom: "2rem" }}>
+          <div className="scroll-jack-sticky" style={{ position: "sticky", top: "10vh", width: "100%", display: "flex", flexDirection: "column" }}>
             
-            {/* Scroll-Linked Magic Animation */}
-            <motion.div style={{ x: magicX, scale: magicScale, rotate: magicRotate, marginTop: "4rem", display: "flex", justifyContent: "center", width: "100%" }}>
-              <div style={{ position: "relative", width: "100%", maxWidth: 1000, height: 400 }}>
-                 <Image src="/images/scroll-magic-2.png" fill style={{ objectFit: "contain", mixBlendMode: "multiply" }} alt="Magic scroll animation" />
-              </div>
-            </motion.div>
+            {/* TABS ROW */}
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "1rem", alignItems: "flex-start", marginBottom: "4rem" }} className="tabs-grid">
+              {tabs.map((tab, i) => {
+                const isActive = active === i;
+                return (
+                  <motion.div 
+                    key={i} 
+                    onClick={() => setActive(i)}
+                    initial={{ opacity: 1, y: 0 }} animate={inView ? { opacity: 1, y: 0 } : {}}
+                    transition={{ delay: i * 0.07, duration: 0.45 }}
+                    style={{
+                      background: isActive ? "white" : "#EBE9F5",
+                      borderRadius: 12,
+                      padding: "1.5rem",
+                      cursor: "pointer",
+                      boxShadow: isActive ? "0 10px 40px rgba(16,0,48,0.06)" : "none",
+                      transition: "all 200ms",
+                      display: "flex", flexDirection: "column",
+                      border: isActive ? "1px solid rgba(16,0,48,0.04)" : "1px solid transparent",
+                    }}
+                  >
+                    <div style={{ fontSize: "0.75rem", fontWeight: 600, color: isActive ? "#6361B8" : "#9B97C8", marginBottom: "1rem" }}>
+                      {tab.num}
+                    </div>
+                    <div style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "1.1rem", color: isActive ? "#100030" : "#9B97C8", marginBottom: isActive ? "1rem" : 0 }}>
+                      {tab.title}
+                    </div>
+                    <AnimatePresence>
+                      {isActive && (
+                        <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} transition={{ duration: 0.3 }} style={{ overflow: "hidden" }}>
+                          <p style={{ fontSize: "0.85rem", color: "#555570", lineHeight: 1.6, marginBottom: "1rem", marginTop: "1rem" }}>{tab.desc}</p>
+                          <p style={{ fontSize: "0.75rem", color: "#9B97C8", lineHeight: 1.5 }}>{tab.detail}</p>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </motion.div>
+                );
+              })}
+            </div>
+
+
           </div>
         </div>
 
@@ -1614,7 +1613,7 @@ export default function HomePage() {
     <>
       <Navbar />
       <main>
-        <HeroSection />
+        <CinematicHero />
         <ChallengeSection />
         <HowItWorksSection />
         <SuccessStoriesSection />

@@ -12,8 +12,8 @@ export default async function DashboardPage() {
 
   const userId = (session.user as any).id;
 
-  // Fetch the user's latest video
-  const latestVideo = await prisma.video.findFirst({
+  // Fetch the user's latest video project
+  const latestVideo = await prisma.videoProject.findFirst({
     where: { userId },
     orderBy: { createdAt: "desc" },
   });
@@ -25,8 +25,8 @@ export default async function DashboardPage() {
   });
 
   // Fetch total videos
-  const totalVideos = await prisma.video.count({ where: { userId } });
-  const completedVideos = await prisma.video.count({ where: { userId, status: "COMPLETED" } });
+  const totalVideos = await prisma.videoProject.count({ where: { userId } });
+  const completedVideos = await prisma.videoProject.count({ where: { userId, status: "COMPLETED" } });
   const isPremium = latestVideo ? !latestVideo.hasWatermark : false;
 
   return (

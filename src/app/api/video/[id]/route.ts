@@ -18,7 +18,7 @@ export async function DELETE(
     const videoId = resolvedParams.id;
 
     // Verify video belongs to user
-    const video = await prisma.video.findUnique({
+    const video = await prisma.videoProject.findUnique({
       where: { id: videoId },
     });
 
@@ -26,8 +26,8 @@ export async function DELETE(
       return NextResponse.json({ error: "Not found or unauthorized" }, { status: 404 });
     }
 
-    // Delete the video
-    await prisma.video.delete({
+    // Delete the video project
+    await prisma.videoProject.delete({
       where: { id: videoId },
     });
 

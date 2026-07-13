@@ -25,12 +25,14 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   credits       Int       @default(1)
-  profiles      Profile[]
-  videos        Video[]
-  analytics     Analytics[]
-  payments      Payment[]
-  accounts      Account[]
-  sessions      Session[]
+  profiles           Profile[]
+  videos             Video[]
+  analytics          Analytics[]
+  payments           Payment[]
+  accounts           Account[]
+  sessions           Session[]
+  candidateProfiles  CandidateProfile[]
+  videoProjects      VideoProject[]
 }
 
 model Account {
@@ -131,4 +133,113 @@ model SystemConfig {
   value       String   @db.Text
   description String?
   updatedAt   DateTime @updatedAt
+}
+
+model SystemPrompt {
+  id          String   @id
+  name        String
+  content     String   @db.Text
+  updatedAt   DateTime @updatedAt
+}
+
+// ══════════════════════════════════════════════════════════════
+// CANDIDATE STORY ENGINE
+// ══════════════════════════════════════════════════════════════
+
+model CandidateProfile {
+  id              String   @id @default(cuid())
+  userId          String
+  targetRole      String?
+  targetIndustry  String?
+  jobDescription  String?  @db.Text
+  slug            String?  @unique
+  isPublic        Boolean  @default(false)
+
+  // Parsed CV data (structured JSON)
+  rawCvText       String?  @db.Text
+  parsedResume    Json?
+  // AI-generated story profile
+  storyProfile    Json?
+  // Ranked highlights
+  highlights      Json?
+
+  // User answers to personal questions
+  answers         Json?
+  // Photo reference (original upload)
+  photoUrl        String?
+  // Generated ninja avatar
+  avatarUrl       String?
+  avatarSeed      String?
+
+  // Preferences
+  tone            String   @default("Professional")
+  ninjaColor      String   @default("#6361B8")
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  videoProjects   VideoProject[]
+}
+
+model VideoProject {
+  id                  String   @id @default(cuid())
+  candidateProfileId  String
+  userId              String
+
+  // Generated content
+  script              String?  @db.Text
+  storyboard          Json?
+  voiceOverUrl        String?
+
+  // Render state
+  // DRAFT → SCRIPT_READY → APPROVED → RENDERING → COMPLETED → ERROR
+  status              String   @default("DRAFT")
+  renderJobId         String?
+  videoUrl            String?
+  thumbnailUrl        String?
+
+  // Billing
+  hasWatermark        Boolean  @default(true)
+  isDownloadable      Boolean  @default(false)
+  renderCost          Float?
+
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  candidateProfile    CandidateProfile @relation(fields: [candidateProfileId], references: [id], onDelete: Cascade)
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  scenes              VideoScene[]
+}
+
+model VideoScene {
+  id              String   @id @default(cuid())
+  videoProjectId  String
+  orderIndex      Int
+  sceneType       String
+  startSec        Float
+  endSec          Float
+  voiceoverText   String?
+  onScreenText    String?
+  visualAssets    Json?
+  // "library" = pre-made scene, "generated" = AI-generated via fal.ai
+  sourceType      String   @default("library")
+  sourceUrl       String?
+  renderedUrl     String?
+
+  videoProject    VideoProject @relation(fields: [videoProjectId], references: [id], onDelete: Cascade)
+}
+
+model SceneLibrary {
+  id           String   @id @default(cuid())
+  slug         String   @unique
+  category     String
+  // "professional", "hobby", "general"
+  tags         Json
+  // ["project_management", "leadership"]
+  description  String
+  videoUrl     String
+  thumbnailUrl String?
+  durationSec  Float
+  createdAt    DateTime @default(now())
 }

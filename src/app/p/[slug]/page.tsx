@@ -3,40 +3,51 @@ import { notFound } from "next/navigation";
 import PublicProfileClient from "./PublicProfileClient";
 
 export default async function PublicProfilePage({ params }: { params: { slug: string } }) {
-  const profile = await prisma.profile.findUnique({
+  const candidateProfile = await prisma.candidateProfile.findUnique({
     where: { slug: params.slug },
     include: {
-      user: {
+      user: true,
+      videoProjects: {
+        orderBy: { createdAt: "desc" },
+        take: 1,
         include: {
-          videos: {
-            where: { status: "COMPLETED" },
-            orderBy: { createdAt: "desc" },
-            take: 1
+          scenes: {
+            orderBy: { orderIndex: "asc" }
           }
         }
       }
     }
   });
 
-  if (!profile || !profile.isPublic) {
+  if (!candidateProfile || !candidateProfile.isPublic) {
     notFound();
   }
 
+  // Parse the stored JSON safely
+  const parsedResume = candidateProfile.parsedResume as any || {};
+  const latestProject = candidateProfile.videoProjects[0];
+
   // Format data for client component
   const clientProfile = {
-    slug: profile.slug,
-    name: profile.fullName,
-    role: profile.title,
-    location: profile.location || "Remote",
-    summary: profile.summary || "",
-    skills: ["Product Strategy", "Agile Methodologies", "User Research", "Go-to-Market"], // Mock skills for now since we don't have a skills table yet
-    experience: [ // Mock experience since we didn't model this yet to save time
-      {
-        id: "1", role: profile.title, company: "Current Company", date: "2021 - Present",
-        bullets: ["Leading core platform team.", "Increased conversion by 24%."]
-      }
-    ],
-    videoUrl: profile.user.videos[0]?.videoUrl || null
+    slug: candidateProfile.slug as string,
+    name: parsedResume.name || candidateProfile.user.name || "Candidate",
+    role: candidateProfile.targetRole || parsedResume.current_role || "Professional",
+    location: "Remote", // CV parser doesn't extract location yet, default to Remote
+    summary: parsedResume.raw_summary || "",
+    skills: parsedResume.skills || [],
+    experience: (parsedResume.work_history || []).map((work: any, i: number) => ({
+      id: String(i),
+      role: work.role,
+      company: work.company,
+      date: work.period,
+      bullets: work.bullets || []
+    })),
+    // Pass the VideoProject data to render the WebStoryPlayer
+    videoProject: latestProject ? {
+      videoUrl: latestProject.videoUrl,
+      scenes: latestProject.scenes,
+      hasWatermark: latestProject.hasWatermark
+    } : null
   };
 
   return <PublicProfileClient profile={clientProfile} />;

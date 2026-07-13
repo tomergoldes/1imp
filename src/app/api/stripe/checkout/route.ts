@@ -60,7 +60,7 @@ export async function POST(req: Request) {
             }
           });
           
-          await prisma.video.update({
+          await prisma.videoProject.update({
             where: { id: videoId },
             data: { hasWatermark: false, isDownloadable: true }
           });

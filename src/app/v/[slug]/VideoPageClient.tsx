@@ -5,19 +5,21 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Download, Share2, CheckCircle, Clock, Play, Pause, Volume2, VolumeX, Maximize, Lock, Check, Loader2, ArrowLeft } from "lucide-react";
 
+import { WebStoryPlayer } from "@/components/WebStoryPlayer";
+
 type VideoData = {
   id: string;
   userId: string;
   videoUrl: string | null;
-  style: string | null;
   status: string;
   hasWatermark: boolean;
   isDownloadable: boolean;
   createdAt: Date;
+  scenes?: any[];
   user?: { name?: string | null; email?: string | null } | null;
 };
 
-export function VideoPageClient({ video }: { video: VideoData }) {
+export function VideoPageClient({ videoProject: video }: { videoProject: VideoData }) {
   const router = useRouter();
   const [loadingCheckout, setLoadingCheckout] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -134,78 +136,11 @@ export function VideoPageClient({ video }: { video: VideoData }) {
               boxShadow: "0 32px 80px rgba(16,0,48,0.18), 0 8px 24px rgba(16,0,48,0.1)",
               border: "1px solid rgba(255,255,255,0.05)"
             }}>
-              {video.videoUrl ? (
-                <video
-                  ref={videoRef}
-                  src={video.videoUrl}
-                  style={{ width: "100%", height: "100%", objectFit: "contain", display: "block" }}
-                  onPlay={() => setIsPlaying(true)}
-                  onPause={() => setIsPlaying(false)}
-                  muted={isMuted}
-                  playsInline
-                  preload="metadata"
-                  controls={!video.hasWatermark}
-                />
-              ) : (
-                <div style={{ width: "100%", height: "100%", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 12, color: "rgba(255,255,255,0.3)" }}>
-                  <div style={{ width: 64, height: 64, borderRadius: "50%", background: "rgba(255,255,255,0.05)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <Play size={28} fill="currentColor" />
-                  </div>
-                  <span style={{ fontSize: "0.95rem", fontWeight: 500 }}>Video Preview</span>
-                </div>
-              )}
-
-              {/* Custom overlay controls (only on watermarked videos) */}
-              {video.hasWatermark && video.videoUrl && (
-                <div className="video-overlay-controls"
-                  style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(0,0,0,0)", transition: "background 0.2s", cursor: "pointer" }}
-                  onClick={togglePlay}
-                >
-                  <div style={{
-                    width: 64, height: 64, borderRadius: "50%",
-                    background: "rgba(255,255,255,0.15)", backdropFilter: "blur(8px)",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    opacity: isPlaying ? 0 : 1, transition: "opacity 0.2s",
-                    border: "1.5px solid rgba(255,255,255,0.3)"
-                  }}>
-                    <Play size={24} fill="white" style={{ color: "white", marginLeft: 3 }} />
-                  </div>
-                </div>
-              )}
-
-              {/* Watermark */}
-              {video.hasWatermark && (
-                <div style={{ position: "absolute", inset: 0, pointerEvents: "none", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 10 }}>
-                  <div style={{ transform: "rotate(-15deg)", userSelect: "none" }}>
-                    <span style={{
-                      fontSize: "clamp(2rem, 6vw, 4rem)", fontWeight: 900,
-                      fontFamily: "var(--font-display)", letterSpacing: "0.25em",
-                      color: "rgba(255,255,255,0.12)",
-                      textShadow: "0 2px 8px rgba(0,0,0,0.3)"
-                    }}>
-                      1IMP PREVIEW
-                    </span>
-                  </div>
-                </div>
-              )}
-
-              {/* Bottom controls for watermarked */}
-              {video.hasWatermark && video.videoUrl && (
-                <div style={{
-                  position: "absolute", bottom: 0, left: 0, right: 0,
-                  padding: "1rem 1.25rem 1rem",
-                  background: "linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%)",
-                  display: "flex", alignItems: "center", justifyContent: "space-between"
-                }}>
-                  <button onClick={togglePlay} style={{ background: "none", border: "none", color: "white", cursor: "pointer", display: "flex", alignItems: "center", gap: 6, fontWeight: 600, fontSize: "0.85rem" }}>
-                    {isPlaying ? <Pause size={18} fill="white" /> : <Play size={18} fill="white" />}
-                    {isPlaying ? "Pause" : "Play"}
-                  </button>
-                  <button onClick={() => { setIsMuted(!isMuted); if(videoRef.current) videoRef.current.muted = !isMuted; }} style={{ background: "none", border: "none", color: "rgba(255,255,255,0.7)", cursor: "pointer" }}>
-                    {isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
-                  </button>
-                </div>
-              )}
+              <WebStoryPlayer 
+                hasWatermark={video.hasWatermark}
+                videoUrl={video.videoUrl}
+                scenes={video.scenes || []}
+              />
             </div>
 
             {/* Below video: title */}

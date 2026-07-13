@@ -4,12 +4,12 @@ import { Metadata } from "next";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
-  const video = await prisma.video.findUnique({
+  const project = await prisma.videoProject.findUnique({
     where: { id: slug },
     include: { user: true }
   }).catch(() => null);
 
-  const name = video?.user?.name || "Professional";
+  const name = project?.user?.name || "Professional";
   const title = `${name}'s 1IMP Video Profile`;
   const description = `Watch ${name}'s AI-generated video introduction. Create your own professional first impression with 1IMP.`;
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://1imp.com";
@@ -31,27 +31,23 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 export default async function VideoPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
 
-  let video = await prisma.video.findUnique({
+  let project = await prisma.videoProject.findUnique({
     where: { id: slug },
-    include: { user: true }
+    include: { 
+      user: true,
+      scenes: { orderBy: { orderIndex: "asc" } }
+    }
   }).catch(() => null);
 
-  if (!video) {
-    video = {
-      id: slug,
-      userId: "mock",
-      videoUrl: "",
-      style: "dynamic",
-      targetRole: null,
-      script: null,
-      status: "COMPLETED",
-      hasWatermark: true,
-      isDownloadable: false,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      user: null,
-    } as any;
+  if (!project) {
+    // Render a 404 or dummy
+    return (
+      <div style={{ height: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <h2>Video not found</h2>
+      </div>
+    );
   }
 
-  return <VideoPageClient video={video as any} />;
+  // Format the data to match what VideoPageClient expects for a VideoProject
+  return <VideoPageClient videoProject={project as any} />;
 }
